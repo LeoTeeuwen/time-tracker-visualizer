@@ -1,0 +1,16 @@
+{
+  "name": "desktop-app",
+  "version": "1.0.0",
+  "description": "Desktop Electron App",
+  "license": "ISC",
+  "author": "Leo Teeuwen",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0"
+  }
+}
