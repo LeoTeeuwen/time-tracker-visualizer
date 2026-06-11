@@ -1,4 +1,6 @@
 const { app, BrowserWindow } = require('electron')
+const { Worker } = require('worker_threads');
+
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -10,7 +12,19 @@ const createWindow = () => {
 }
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
+    
+    // const smtcWorker = new Worker(path.join(__dirname, 'smtc-worker.js'));
+    const smtcWorker = new Worker('./smtc-worker.js');
+    smtcWorker.on('message', (data) => {
+        let isSystemMediaPlaying = data.isMediaActive;
+        let mediaAppSource = data.sourceApp || '';
+
+        console.log("media playing: ", isSystemMediaPlaying);
+        console.log("media playing2: ", mediaAppSource);
+    }).catch((errorr) => {
+        console.log(errorr)
+    });
 
     myInterval = setInterval(() => {
         console.log('Do DB stuff!');
