@@ -1,30 +1,32 @@
 const { parentPort } = require('worker_threads');
-// Import the native N-API Windows binding layer
 const { SMTCMonitor } = require('@coooookies/windows-smtc-monitor'); 
 
-// Windows WinRT PlaybackStatus Enum Key:
-// 0 = Closed, 1 = Opened, 2 = Changing, 3 = Stopped, 4 = Playing, 5 = Paused
+// Windows WinRT PlaybackStatus Enum: 4 = Playing
 const WINDOWS_PLAYING_ENUM = 4;
 
-function checkWindowsMedia() {
+function checkAllWindowsMedia() {
+  try {
+    // 1. Fetch ALL registered media loops on the operating system
+    const allSessions = SMTCMonitor.getMediaSessions() || [];
+    
+    // 2. Isolate ONLY the applications that are actively playing right now
+    const activeSessions = allSessions
+      .filter(session => session.playback?.playbackStatus === WINDOWS_PLAYING_ENUM)
+      .map(session => ({
+        sourceApp: session.sourceAppId,         // e.g., "Spotify.exe", "chrome.exe"
+        title: session.media?.title || "Unknown Track",
+        artist: session.media?.artist || "Unknown Artist"
+      }));
 
-    try {
-    // Queries the GlobalSystemMediaTransportControlsSessionManager
-    const currentSession = SMTCMonitor.getCurrentMediaSession();
-    if (currentSession && currentSession.playback?.playbackStatus === WINDOWS_PLAYING_ENUM) {
-      // Send active media properties back to the main thread
-      parentPort.postMessage({
-        isMediaActive: true,
-        sourceApp: currentSession.sourceAppId, // e.g., "chrome.exe", "Spotify.exe"
-        title: currentSession.media?.title || "Unknown Session"
-      });
-    } else {
-      parentPort.postMessage({ isMediaActive: false });
-    }
+    // 3. Emit the array of all competing playback streams back to the main thread
+    parentPort.postMessage({
+      isMediaActive: activeSessions.length > 0,
+      activeSources: activeSessions
+    });
   } catch (error) {
-    parentPort.postMessage({ isMediaActive: false, error: error.message });
+    parentPort.postMessage({ isMediaActive: false, activeSources: [], error: error.message });
   }
 }
 
-// Poll the Windows Media Manager every 2 seconds
-setInterval(checkWindowsMedia, 2000);
+// Poll the Windows Session Manager layer every 2 seconds
+setInterval(checkAllWindowsMedia, 2000);

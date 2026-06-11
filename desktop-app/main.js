@@ -11,24 +11,28 @@ const createWindow = () => {
     win.loadFile('index.html')
 }
 
+let currentMediaSources = []; // Store multiple playing applications simultaneously
+let systemMediaPlaying = false;
+
 app.whenReady().then(() => {
     createWindow();
     
-    // const smtcWorker = new Worker(path.join(__dirname, 'smtc-worker.js'));
     const smtcWorker = new Worker('./smtc-worker.js');
+    
     smtcWorker.on('message', (data) => {
-        let isSystemMediaPlaying = data.isMediaActive;
-        let mediaAppSource = data.sourceApp || '';
-
-        console.log("media playing: ", isSystemMediaPlaying);
-        console.log("media playing2: ", mediaAppSource);
-    }).catch((errorr) => {
-        console.log(errorr)
+        systemMediaPlaying = data.isMediaActive;
+        currentMediaSources = data.activeSources || [];
     });
-
+    
     myInterval = setInterval(() => {
         console.log('Do DB stuff!');
+        const runningMediaString = currentMediaSources
+            .map(item => `${item.sourceApp} ("${item.title}" by ${item.artist})`)
+            .join(' AND ');
+        console.log(runningMediaString);
     }, 5000);
+
+    console.log(runningMediaString);
 })
 
 app.on('window-all-closed', () => {
