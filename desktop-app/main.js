@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, powerMonitor } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
 
@@ -32,6 +32,7 @@ app.whenReady().then(() => {
             .join(' AND ');
         console.log(runningMediaString);
         console.log(activeWindowSync());
+        console.log(powerMonitor.getSystemIdleTime());
 
     }, 5000);
 })
