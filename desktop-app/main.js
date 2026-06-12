@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const { Worker } = require('worker_threads');
+const { activeWindowSync } = require('get-windows');
 
 
 const createWindow = () => {
@@ -30,9 +31,9 @@ app.whenReady().then(() => {
             .map(item => `${item.sourceApp} ("${item.title}" by ${item.artist})`)
             .join(' AND ');
         console.log(runningMediaString);
-    }, 5000);
+        console.log(activeWindowSync());
 
-    console.log(runningMediaString);
+    }, 5000);
 })
 
 app.on('window-all-closed', () => {
