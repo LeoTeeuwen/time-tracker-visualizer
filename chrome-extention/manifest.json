@@ -1,6 +1,6 @@
 {
-  "name": "Hello Extensions",
-  "description": "Base Level Extension",
+  "name": "Time Tracker Visualizer",
+  "description": "Tracks your chrome activity!",
   "version": "1.0",
   "manifest_version": 3,
   "action": {

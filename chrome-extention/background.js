@@ -12,31 +12,43 @@ async function getCurrentTab() {
   }
 
 // Is called on the tab being opened, closed, and focused. Maybe use this to only send reports of new tabs and then assume the tab is focused as it calls when a tab is made or focused? (and deal with closing internally ofc)
+// Called when tab is opened (pending URL) and status is loading. When tab deleted (info is new tab), on tab switch (info is new tab)
 chrome.tabs.onActivated.addListener(
     (activeInfo) => {
-        // console.log(activeInfo)
         getCurrentTab().then((info) => {
-            console.log(info)
+            // Only take inputs when the tab is not loading to not interfere with tab update pushing
+            if (info.status !== "loading") {   
+                console.log(`Current Tab is now ${info.url}`);
+            }
         })
-        console.log("Tab Activated!")
     }
 )
 
+
+// This seems less on demand then OnActivated
+// chrome.tabs.onCreated.addListener((tab) => {
+//     console.log(tab)
+//     console.log(`AFocused tab is now ${tab}`);
+// });
+
+// chrome.tabs.onRemoved.addListener((tab, removeInfo) => {
+//     console.log(`DFocused tab is now ${tab}`)
+// })
+
+// Use this listener to grab when the focused changes by cross referencing current tab IDs!
+// Then use this to send a new update to the DB that then signals the prev website has been left
+// Detects on tab open, and on tab entering another website
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // Check if the tab has finished loading and the URL has changed
     if (changeInfo.status === 'complete') {
-        // console.log("Tab navigated and updated!")
-        // console.log("tab ID: ", tabId)
-        // console.log("changeInfo: ", changeInfo)
-        // console.log("tab: ", tab)
-
-        
-        // const urlObj = new URL(tab.url);
-        // console.log(urlObj.hostname)
+        const urlObj = new URL(tab.url);
+        // console.log(`${tabId} updated to ${urlObj.hostname}`)
+        console.log(`Current Tab is now ${urlObj.hostname}`)
     }
 });
 
 // Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
     // console.log("windowID: ", windowId);
+    console.log("Focus Changed!")
 });
