@@ -7,6 +7,7 @@ import android.provider.Settings
 import com.facebook.react.bridge.*
 import java.util.*
 
+// class UsageStatsModule() : ReactPackage {
 class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String = "UsageStatsModule"
 
