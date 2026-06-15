@@ -6,6 +6,9 @@ import android.content.Intent
 import android.provider.Settings
 import com.facebook.react.bridge.*
 import java.util.*
+import java.util.SortedMap
+import java.util.TreeMap
+import android.app.usage.UsageStats
 
 // class UsageStatsModule() : ReactPackage {
 class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
@@ -42,5 +45,30 @@ class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBase
             }
         }
         promise.resolve(resultArray)
+    }
+
+    @ReactMethod
+    fun getFocusedApp(promise: Promise) {
+        try {
+            var currentApp = "UNKNOWN"
+            val usm = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val time = System.currentTimeMillis()
+            
+            // Query for application usage stats in the last 10 seconds
+            val appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time)
+            
+            if (appList != null && appList.isNotEmpty()) {
+                val mySortedMap: SortedMap<Long, UsageStats> = TreeMap()
+                for (usageStats in appList) {
+                    mySortedMap[usageStats.lastTimeUsed] = usageStats
+                }
+                if (mySortedMap.isNotEmpty()) {
+                    currentApp = mySortedMap[mySortedMap.lastKey()]?.packageName ?: "UNKNOWN"
+                }
+            }
+            promise.resolve(currentApp)
+        } catch (e: Exception) {
+            promise.reject("ERROR_GETTING_APP", e.message, e)
+        }
     }
 }

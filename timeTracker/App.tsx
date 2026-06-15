@@ -4,9 +4,8 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-
-
 const { UsageStatsModule } = NativeModules;
+
 
 const fetchUsageData = async () => {
   const hasPermission = await UsageStatsModule.checkPermission();
@@ -15,18 +14,16 @@ const fetchUsageData = async () => {
     return;
   }
 
-  const end = Date.now();
-  const start = end - 24 * 60 * 60 * 1000; // Past 24 hours
-  const stats = await UsageStatsModule.getAppUsageTime(start, end);
-  console.log("Other app stats:", stats);
+  const packageName = await UsageStatsModule.getFocusedApp();
+  return packageName;
 };
 
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
-  fetchUsageData().then(() => {
-    console.log("Time tracking done!");
+  fetchUsageData().then((packageName: string) => {
+    console.log(`Current package is: ${packageName}`);
   });
 
   return (
