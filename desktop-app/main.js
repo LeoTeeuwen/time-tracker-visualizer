@@ -1,14 +1,14 @@
+require('dotenv').config();
 const { app, BrowserWindow, powerMonitor, ipcMain } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('node:path');
 
-const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', 'sb_publishable_xRczi_x4v7SX5TcczodaIw_Y-LL1XNQ')
+const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
 
 const pushToDatabase = () => {
-    console.log("Ran!")
     supabase.from('time_events').select().then((data, error) => {
         console.log("data: ", data);
     })
