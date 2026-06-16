@@ -1,7 +1,13 @@
 const { app, BrowserWindow, powerMonitor } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
+const { createClient } = require('@supabase/supabase-js');
 
+const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', 'sb_publishable_xRczi_x4v7SX5TcczodaIw_Y-LL1XNQ')
+
+supabase.from('time_events').select().then((data, error) => {
+    console.log("data: ", data);
+})
 
 const createWindow = () => {
     const win = new BrowserWindow({
