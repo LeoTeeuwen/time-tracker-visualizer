@@ -61,22 +61,20 @@ app.whenReady().then(() => {
             .join(' AND ');
         console.log(runningMediaString);
         console.log(activeWindowSync());
-        currentApplication = {
-            // TODO get device name
-            device: computerName,
-            event_time: new Date(),
-            application_name: activeWindowSync().owner.name
-        }
-        console.log(currentApplication)
-    }, 5000);
-    
-    idleInterval = setInterval(() => {
         // Argument is number of seconds before considered idle
         console.log(powerMonitor.getSystemIdleTime());
         const state = powerMonitor.getSystemIdleState(5);
         console.log('Current System State - ', state);
-    }, 1000);
 
+        currentApplication = {
+            // TODO get device name
+            device: computerName,
+            event_time: new Date(),
+            application_name: activeWindowSync().owner.name,
+            state: state
+        }
+        console.log(currentApplication)
+    }, 5000);
 })
 
 app.on('window-all-closed', () => {
