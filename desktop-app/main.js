@@ -3,7 +3,9 @@ const { app, BrowserWindow, powerMonitor, ipcMain } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
 const { createClient } = require('@supabase/supabase-js');
+const os = require('os');
 const path = require('node:path');
+
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
@@ -13,12 +15,13 @@ let currentApplication = {
     application_name: null
 }
 
+const computerName = os.hostname()
+
 const pushToDatabase = () => {
     if (currentApplication.device === null) {
         console.log("Wait for it to register an app!");
         return;
     }
-    
     supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
         console.log("data: ", data);
         console.log("error: ", error);
@@ -60,7 +63,7 @@ app.whenReady().then(() => {
         console.log(activeWindowSync());
         currentApplication = {
             // TODO get device name
-            device: "Laptop",
+            device: computerName,
             event_time: new Date(),
             application_name: activeWindowSync().owner.name
         }
