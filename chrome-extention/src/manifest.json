@@ -1,0 +1,21 @@
+{
+  "name": "Time Tracker Visualizer",
+  "description": "Tracks your chrome activity!",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "home.html",
+    "default_icon": "icon.png"
+  },
+    "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "tabs", "activeTab"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
