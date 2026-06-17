@@ -7,12 +7,24 @@ const path = require('node:path');
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
+let currentApplication = {
+    device: null,
+    event_time: null,
+    application_name: null
+}
 
 const pushToDatabase = () => {
-    supabase.from('time_events').select().then((data, error) => {
+    if (currentApplication.device === null) {
+        console.log("Wait for it to register an app!");
+        return;
+    }
+    
+    supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
         console.log("data: ", data);
+        console.log("error: ", error);
     })
 }
+
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -46,6 +58,13 @@ app.whenReady().then(() => {
             .join(' AND ');
         console.log(runningMediaString);
         console.log(activeWindowSync());
+        currentApplication = {
+            // TODO get device name
+            device: "Laptop",
+            event_time: new Date(),
+            application_name: activeWindowSync().owner.name
+        }
+        console.log(currentApplication)
     }, 5000);
     
     idleInterval = setInterval(() => {
