@@ -8,7 +8,8 @@
     "default_icon": "dq7ydpnwdfwf1.png"
   },
     "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "permissions": [
     "tabs", "activeTab"

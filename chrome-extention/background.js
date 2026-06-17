@@ -4,6 +4,9 @@
 // As in, "you spent X hours on reddit" or "You switched from reddit to youtube on these timestamps in this hour"
 // Both?
 
+// importScripts('./config.js');
+import './config.js';
+
 async function getCurrentTab() {
     let queryOptions = { active: true, lastFocusedWindow: true };
     // `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -50,5 +53,5 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
     // console.log("windowID: ", windowId);
-    console.log("Focus Changed!")
+    console.log("Focus Changed!");
 });
