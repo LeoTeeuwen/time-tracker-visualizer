@@ -5,7 +5,11 @@
 // Both?
 
 // importScripts('./config.js');
+import { createClient } from '@supabase/supabase-js';
 import './config.js';
+
+const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', env.DB_PUBLISHABLE_KEY);
+
 
 async function getCurrentTab() {
     let queryOptions = { active: true, lastFocusedWindow: true };
