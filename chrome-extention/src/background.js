@@ -10,6 +10,21 @@ import './config.js';
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', env.DB_PUBLISHABLE_KEY);
 
+let currentTab = {
+    device: "gaming",
+    event_time: new Date(),
+    application_name: "new tab",
+    state: "active",
+    app_type: "chrome"
+}
+
+async function pushToDatabase() {
+    supabase.from('time_events').insert(currentTab).select().then((data, error) => {
+        console.log("data: ", data);
+        console.log("error: ", error);
+    })
+}
+
 
 async function getCurrentTab() {
     let queryOptions = { active: true, lastFocusedWindow: true };
@@ -57,5 +72,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
     // console.log("windowID: ", windowId);
+    pushToDatabase().then(() => {
+        console.log("All done!");
+    })
     console.log("Focus Changed!");
 });
