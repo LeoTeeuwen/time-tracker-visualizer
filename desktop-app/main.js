@@ -12,7 +12,8 @@ const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', proces
 let currentApplication = {
     device: null,
     event_time: null,
-    application_name: null
+    application_name: null,
+    app_type: null
 }
 
 const computerName = os.hostname()
@@ -67,11 +68,11 @@ app.whenReady().then(() => {
         console.log('Current System State - ', state);
 
         currentApplication = {
-            // TODO get device name
             device: computerName,
             event_time: new Date(),
             application_name: activeWindowSync().owner.name,
-            state: state
+            state: state,
+            app_type: "application"
         }
         console.log(currentApplication)
     }, 5000);
