@@ -26,10 +26,12 @@ const options = {
     },
     color: '#ff00ff',
     parameters: {
-        delay: 5000,
+        delay: 1000,
     },
     foregroundServiceType: ['dataSync'],
 };
+
+const sleep = (time: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
 
 const veryIntensiveTask = async (taskDataArguments: any) => {
   const { delay } = taskDataArguments;
@@ -38,7 +40,7 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
   await new Promise( async (resolve) => {
       for (let i = 0; BackgroundJob.isRunning(); i++) {
           console.log(i);
-          setTimeout(() => {}, delay);
+          await sleep(delay);
       }
   });
 
