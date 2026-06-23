@@ -1,4 +1,5 @@
 import { NewAppScreen } from '@react-native/new-app-screen';
+import { useEffect } from 'react';
 import { NativeModules, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
@@ -18,9 +19,18 @@ const fetchUsageData = async () => {
   return packageName;
 };
 
-
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+
+  useEffect(() => {
+
+    setInterval(() => {
+      fetchUsageData().then((packageName: string) => {
+        console.log(`Current package is: ${packageName}`);
+      });
+    }, 5000);
+  
+  }, [])
 
   fetchUsageData().then((packageName: string) => {
     console.log(`Current package is: ${packageName}`);
