@@ -26,7 +26,7 @@ const options = {
     },
     color: '#ff00ff',
     parameters: {
-        delay: 1000,
+        delay: 5000,
     },
     foregroundServiceType: ['dataSync'],
 };
@@ -35,30 +35,39 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
   const { delay } = taskDataArguments;
   console.log(BackgroundJob.isRunning(), delay)
 
-  setInterval(() => {
-    console.log("This message appears after 5 seconds.");
-  }, 5000);
+  await new Promise( async (resolve) => {
+      for (let i = 0; BackgroundJob.isRunning(); i++) {
+          console.log(i);
+          setTimeout(() => {}, delay);
+      }
+  });
+
+  // setInterval(() => {
+  //   console.log("Pushing to DB!");
+
+  //   const currentApplication = {
+  //       device: "test",
+  //       event_time: new Date(),
+  //       application_name: "test",
+  //       state: "active",
+  //       app_type: "test"
+  //   }
+  //   supabase.from('time_events').insert(currentApplication).select().then((data) => {
+  //     console.log("data: ", data);
+  //     console.log("error: ", data.error);
+  //   })
+  // }, 5000);
 }
 
 const fetchUsageData = async () => {
-  // const hasPermission = await UsageStatsModule.checkPermission();
-  // if (!hasPermission) {
-  //   UsageStatsModule.openSettings();
-  //   return;
-  // }
-  const currentApplication = {
-      device: "test",
-      event_time: new Date(),
-      application_name: "test",
-      state: "active",
-      app_type: "test"
+  const hasPermission = await UsageStatsModule.checkPermission();
+  if (!hasPermission) {
+    UsageStatsModule.openSettings();
+    return;
   }
-  // const packageName = await UsageStatsModule.getFocusedApp();
-  // return packageName;
-  supabase.from('time_events').insert(currentApplication).select().then((data) => {
-      console.log("data: ", data);
-      console.log("error: ", data.error);
-  })
+
+  const packageName = await UsageStatsModule.getFocusedApp();
+  return packageName;
 };
 
 function App() {
