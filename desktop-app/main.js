@@ -31,12 +31,7 @@ const pushToDatabase = () => {
 }
 
 const grabAllFromDatabase = async () => {
-    return await supabase.from('time_events').select("*")
-    // supabase.from('time_events').select("*").then((data, error) => {
-    //     console.log("data: ", data);
-    //     // return data;
-    //     return "gaming!";
-    // })
+    return await supabase.from('time_events').select("*").eq("date", new Date())
 }
 
 let devToolsOpen = true;
