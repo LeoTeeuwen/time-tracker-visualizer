@@ -39,6 +39,17 @@ const grabAllFromDatabase = async () => {
     // })
 }
 
+let devToolsOpen = true;
+const devToolsSwitch = (win) => {
+    if (devToolsOpen) {
+        win.webContents.closeDevTools()
+        devToolsOpen = false;
+    } else {
+        win.webContents.openDevTools()
+        devToolsOpen = true;
+    }
+}
+
 const createWindow = () => {
     const win = new BrowserWindow({
         width: 800,
@@ -50,15 +61,18 @@ const createWindow = () => {
 
     win.loadFile('index.html')
     win.webContents.openDevTools()
+    return win;
 }
 
 let currentMediaSources = []; // Store multiple playing applications simultaneously
 let systemMediaPlaying = false;
 
 app.whenReady().then(() => {
+    // TODO ensure the structure of the window being before  the creation of an IPC call is okay
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
     ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
-    createWindow();
+    win = createWindow();
+    ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
     const smtcWorker = new Worker('./smtc-worker.js');
     
