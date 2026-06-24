@@ -13,6 +13,7 @@ let currentApplication = {
     device: null,
     event_time: null,
     application_name: null,
+    state: null,
     app_type: null
 }
 
@@ -29,6 +30,14 @@ const pushToDatabase = () => {
     })
 }
 
+const grabAllFromDatabase = async () => {
+    return await supabase.from('time_events').select("*")
+    // supabase.from('time_events').select("*").then((data, error) => {
+    //     console.log("data: ", data);
+    //     // return data;
+    //     return "gaming!";
+    // })
+}
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -40,6 +49,7 @@ const createWindow = () => {
     })
 
     win.loadFile('index.html')
+    win.webContents.openDevTools()
 }
 
 let currentMediaSources = []; // Store multiple playing applications simultaneously
@@ -47,6 +57,7 @@ let systemMediaPlaying = false;
 
 app.whenReady().then(() => {
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
+    ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
     createWindow();
     
     const smtcWorker = new Worker('./smtc-worker.js');
