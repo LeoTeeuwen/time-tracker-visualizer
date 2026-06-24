@@ -69,21 +69,33 @@ const fetchUsageData = async () => {
 };
 
 const startWorker = () => {
-    if (BackgroundJob.isRunning()) {
-      console.log("Worker already running!");
-      return;
-    }
+  if (BackgroundJob.isRunning()) {
+    console.log("Worker already running!");
+    return;
+  }
 
-    BackgroundJob.start(veryIntensiveTask, options);
+  BackgroundJob.start(veryIntensiveTask, options);
 };
 
 const endWorker = () => {
-    if (!BackgroundJob.isRunning()) {
-      console.log("Worker is already not running!");
-      return;
-    }
+  if (!BackgroundJob.isRunning()) {
+    console.log("Worker is already not running!");
+    return;
+  }
 
-    BackgroundJob.stop();
+  BackgroundJob.stop();
+};
+
+const pushToDatabase = () => {
+  if (currentApplication.application_name === null) {
+    console.log("Wait until it grabs the user's application!");
+    return;
+  }
+  
+  supabase.from('time_events').insert(currentApplication).select().then((data) => {
+    console.log("data: ", data);
+    console.log("error: ", data.error);
+  })
 };
 
 export default function Home() {
@@ -103,6 +115,13 @@ export default function Home() {
         {/* Stop button */}
         <TouchableOpacity onPress={() => endWorker()} style={[styles.button, styles.stopButton]}>
             <Text style={styles.buttonText}>Stop</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.spacer} />
+        
+        {/* Stop button */}
+        <TouchableOpacity onPress={() => pushToDatabase()} style={[styles.button, styles.pushButton]}>
+            <Text style={styles.buttonText}>Push</Text>
         </TouchableOpacity>
     </View>
   );
@@ -127,6 +146,9 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: 'red',
+  },
+  pushButton: {
+    backgroundColor: '#3150ff',
   },
   buttonText: {
     color: 'white',
