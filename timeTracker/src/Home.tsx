@@ -1,0 +1,125 @@
+import React from 'react';
+import { useEffect } from 'react';
+import { NativeModules, StatusBar, TouchableOpacity, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import BackgroundJob from 'react-native-background-actions';
+// Needed for supabase
+import 'react-native-url-polyfill/auto';
+import { createClient } from '@supabase/supabase-js';
+import { DB_PUBLISHABLE_KEY } from '@env';
+const { UsageStatsModule } = NativeModules;
+
+  // setInterval(() => {
+  //   console.log("Pushing to DB!");
+
+
+  //   const currentApplication = {
+  //       device: "test",
+  //       event_time: new Date(),
+  //       application_name: "test",
+  //       state: "active",
+  //       app_type: "test"
+  //   }
+  //   supabase.from('time_events').insert(currentApplication).select().then((data) => {
+  //     console.log("data: ", data);
+  //     console.log("error: ", data.error);
+  //   })
+  // }, 5000);
+
+const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', DB_PUBLISHABLE_KEY);
+
+
+const options = {
+    taskName: 'Example',
+    taskTitle: 'ExampleTask title',
+    taskDesc: 'ExampleTask description',
+    taskIcon: {
+        name: 'ic_launcher',
+        type: 'mipmap',
+    },
+    color: '#ff00ff',
+    parameters: {
+        delay: 1000,
+    },
+    foregroundServiceType: ['dataSync'],
+};
+
+const sleep = (time: any) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
+
+const veryIntensiveTask = async (taskDataArguments: any) => {
+  const { delay } = taskDataArguments;
+  console.log(BackgroundJob.isRunning(), delay)
+
+  await new Promise( async (resolve) => {
+      for (let i = 0; BackgroundJob.isRunning(); i++) {
+          fetchUsageData().then((packageName: string) => {
+            console.log(`Current package is: ${packageName}`);
+          });
+          await sleep(delay);
+      }
+  });
+}
+
+const fetchUsageData = async () => {
+  const hasPermission = await UsageStatsModule.checkPermission();
+  if (!hasPermission) {
+    UsageStatsModule.openSettings();
+    return;
+  }
+
+  const packageName = await UsageStatsModule.getFocusedApp();
+  return packageName;
+};
+
+
+export default function Home() {
+    useEffect(() => {
+        BackgroundJob.start(veryIntensiveTask, options);
+    },[])
+  
+    return (
+    <View style={styles.container}>
+        {/* Start button */}
+        <TouchableOpacity style={[styles.button, styles.startButton]}>
+            <Text style={styles.buttonText}>Start</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.spacer} />
+        
+        {/* Stop button */}
+        <TouchableOpacity style={[styles.button, styles.stopButton]}>
+            <Text style={styles.buttonText}>Stop</Text>
+        </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'black', // Sets the background to black
+    justifyContent: 'center', // Centers items vertically
+    alignItems: 'center',     // Centers items horizontally (width-wise)
+  },
+  button: {
+    width: 200,               // Set a fixed width for the buttons
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  startButton: {
+    backgroundColor: 'green',
+  },
+  stopButton: {
+    backgroundColor: 'red',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  spacer: {
+    height: '10%',            // Creates the exact 10% height difference space
+  },
+});
