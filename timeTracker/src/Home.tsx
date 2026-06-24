@@ -8,25 +8,16 @@ import { createClient } from '@supabase/supabase-js';
 import { DB_PUBLISHABLE_KEY } from '@env';
 const { UsageStatsModule } = NativeModules;
 
-  // setInterval(() => {
-  //   console.log("Pushing to DB!");
-
-
-  //   const currentApplication = {
-  //       device: "test",
-  //       event_time: new Date(),
-  //       application_name: "test",
-  //       state: "active",
-  //       app_type: "test"
-  //   }
-  //   supabase.from('time_events').insert(currentApplication).select().then((data) => {
-  //     console.log("data: ", data);
-  //     console.log("error: ", data.error);
-  //   })
-  // }, 5000);
-
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', DB_PUBLISHABLE_KEY);
 
+let currentApplication: {device: string|null, event_time: Date|null, application_name: string|null, state: string|null, app_type: string|null} = {
+    // TODO get device name
+    device: "phone",
+    event_time: null,
+    application_name: null,
+    state: null,
+    app_type: null
+}
 
 const options = {
     taskName: 'Example',
@@ -38,7 +29,7 @@ const options = {
     },
     color: '#ff00ff',
     parameters: {
-        delay: 1000,
+        delay: 5000,
     },
     foregroundServiceType: ['dataSync'],
 };
@@ -53,6 +44,13 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
       for (let i = 0; BackgroundJob.isRunning(); i++) {
           fetchUsageData().then((packageName: string) => {
             console.log(`Current package is: ${packageName}`);
+            currentApplication = {
+              ...currentApplication,
+              application_name: packageName,
+              event_time: new Date(),
+              state: "active",
+              app_type: "mobile"
+            };
           });
           await sleep(delay);
       }
