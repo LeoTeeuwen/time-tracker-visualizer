@@ -70,6 +70,23 @@ const fetchUsageData = async () => {
   return packageName;
 };
 
+const startWorker = () => {
+    if (BackgroundJob.isRunning()) {
+      console.log("Worker already running!");
+      return;
+    }
+
+    BackgroundJob.start(veryIntensiveTask, options);
+};
+
+const endWorker = () => {
+    if (!BackgroundJob.isRunning()) {
+      console.log("Worker is already not running!");
+      return;
+    }
+
+    BackgroundJob.stop();
+};
 
 export default function Home() {
     useEffect(() => {
@@ -79,14 +96,14 @@ export default function Home() {
     return (
     <View style={styles.container}>
         {/* Start button */}
-        <TouchableOpacity style={[styles.button, styles.startButton]}>
+        <TouchableOpacity onPress={() => startWorker()} style={[styles.button, styles.startButton]}>
             <Text style={styles.buttonText}>Start</Text>
         </TouchableOpacity>
         
         <View style={styles.spacer} />
         
         {/* Stop button */}
-        <TouchableOpacity style={[styles.button, styles.stopButton]}>
+        <TouchableOpacity onPress={() => endWorker()} style={[styles.button, styles.stopButton]}>
             <Text style={styles.buttonText}>Stop</Text>
         </TouchableOpacity>
     </View>
