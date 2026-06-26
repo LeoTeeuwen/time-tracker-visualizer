@@ -17,8 +17,16 @@ async function loadContent() {
   // Update the tag to connect renderer with main process
   const data = await window.electronAPI.grabAllDataFromDatabase();
   console.log(data.data)
-  
-  databaseText.innerText = `${data.data}`;
+
+  let cleanedOutput = ""
+
+  for (let entry of data.data) {
+    console.log(entry);
+    let localDateTime = new Date(entry.event_time).toLocaleString();
+    cleanedOutput = cleanedOutput + `device: ${entry.device}, datetime ${localDateTime} \n`;
+  }
+
+  databaseText.innerText = cleanedOutput;
 };
 
 
