@@ -1,9 +1,20 @@
 const setButton = document.getElementById('basicDBButton');
 const databaseText = document.getElementById('databaseOutputText')
-
+const backButton = document.getElementById('dateBackBtn')
+const forwardButton = document.getElementById('dateForwardBtn')
 
 setButton.addEventListener('click', () => {
   window.electronAPI.pushToDatabase();
+})
+
+backButton.addEventListener('click', () => {
+  window.electronAPI.backOneDay();
+  loadContent();
+})
+
+forwardButton.addEventListener('click', () => {
+  window.electronAPI.forwardOneDay();
+  loadContent();
 })
 
 window.addEventListener('keydown', (event) => {

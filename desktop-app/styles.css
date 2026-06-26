@@ -5,3 +5,47 @@
 #databaseOutputText {
     color: white;
 }
+
+/* The Navigation Bar Container */
+.nav-bar {
+  display: flex;
+  justify-content: space-between; /* Pushes items to left, center, right */
+  align-items: center;            /* Vertically centers items in the bar */
+  
+  /* The padding creates your requested margins from the edges */
+  padding: 15px 20px; 
+  
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+
+  /* OPTIONAL ELECTRON FEATURE: 
+      Allows the user to drag the window by clicking the empty space in this div */
+  -webkit-app-region: drag;
+  user-select: none; 
+}
+
+/* The Buttons */
+.nav-btn {
+  /* REQUIRED FOR ELECTRON: 
+      Makes sure the buttons are clickable and don't drag the window */
+  -webkit-app-region: no-drag; 
+  
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+.nav-btn:hover {
+  background-color: #e5e5e5;
+}
+
+/* The Middle Text */
+.middle-text {
+  margin: 0; /* Removes default <p> margins to keep it perfectly centered */
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}

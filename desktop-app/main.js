@@ -9,6 +9,12 @@ const path = require('node:path');
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
+const dayObject = {
+    todaysDate: null,
+    startUTCTimeDate: null,
+    endUTCTimeDate: null
+}
+
 let currentApplication = {
     device: null,
     event_time: null,
@@ -35,14 +41,19 @@ const grabAllFromDatabase = async () => {
 
     console.log(`${localDate}`)
 
+    
     let start = new Date(localDate);
     start.setHours(0,0,0,0);
-
+    
     var end = new Date(localDate);
     end.setHours(23,59,59,999);
-
-
+    
+    
     console.log( start.toUTCString() + ':' + end.toUTCString() );
+    dayObject.todaysDate = localDate;
+    dayObject.startUTCTimeDate = start.toUTCString();
+    dayObject.endUTCTimeDate = end.toUTCString();
+    console.log("day object:", dayObject)
 
     return await supabase.from('time_events').select("*").lt('event_time', end.toUTCString()).gt('event_time', start.toUTCString());
 }
@@ -57,6 +68,14 @@ const devToolsSwitch = (win) => {
         devToolsOpen = true;
     }
 }
+
+const backOneDay = (() => {
+
+})
+
+const forwardOneDay = (() => {
+
+})
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -78,6 +97,7 @@ let systemMediaPlaying = false;
 app.whenReady().then(() => {
     // TODO ensure the structure of the window being before  the creation of an IPC call is okay
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
+    ipcMain.on('back-one-button', (_) => pushToDatabase())
     ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
