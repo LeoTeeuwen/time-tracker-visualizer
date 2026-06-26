@@ -31,7 +31,20 @@ const pushToDatabase = () => {
 }
 
 const grabAllFromDatabase = async () => {
-    return await supabase.from('time_events').select("*").eq("date", new Date())
+    let localDate = new Date().toLocaleDateString();
+
+    console.log(`${localDate}`)
+
+    let start = new Date(localDate);
+    start.setHours(0,0,0,0);
+
+    var end = new Date(localDate);
+    end.setHours(23,59,59,999);
+
+
+    console.log( start.toUTCString() + ':' + end.toUTCString() );
+
+    return await supabase.from('time_events').select("*").lt('event_time', end.toUTCString()).gt('event_time', start.toUTCString());
 }
 
 let devToolsOpen = true;
@@ -71,6 +84,7 @@ app.whenReady().then(() => {
     
     const smtcWorker = new Worker('./smtc-worker.js');
     
+
     smtcWorker.on('message', (data) => {
         systemMediaPlaying = data.isMediaActive;
         currentMediaSources = data.activeSources || [];
