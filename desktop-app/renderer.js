@@ -2,6 +2,7 @@ const setButton = document.getElementById('basicDBButton');
 const databaseText = document.getElementById('databaseOutputText')
 const backButton = document.getElementById('dateBackBtn')
 const forwardButton = document.getElementById('dateForwardBtn')
+const currentDayText = document.getElementById('currentDayText')
 
 setButton.addEventListener('click', () => {
   window.electronAPI.pushToDatabase();
@@ -37,6 +38,7 @@ async function loadContent() {
     cleanedOutput = cleanedOutput + `device: ${entry.device}, datetime ${localDateTime} \n`;
   }
 
+  currentDayText.innerText = "day";
   databaseText.innerText = cleanedOutput;
 };
 

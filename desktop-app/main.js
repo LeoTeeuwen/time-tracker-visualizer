@@ -10,8 +10,10 @@ const path = require('node:path');
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
 const dayObject = {
-    todaysDate: null,
+    currentDate: null,
+    startUTCTimeDateString: null,
     startUTCTimeDate: null,
+    endUTCTimeDateString: null,
     endUTCTimeDate: null
 }
 
@@ -25,18 +27,7 @@ let currentApplication = {
 
 const computerName = os.hostname()
 
-const pushToDatabase = () => {
-    if (currentApplication.device === null) {
-        console.log("Wait for it to register an app!");
-        return;
-    }
-    supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
-        console.log("data: ", data);
-        console.log("error: ", error);
-    })
-}
-
-const grabAllFromDatabase = async () => {
+const setDayObject = (() => {
     let localDate = new Date().toLocaleDateString();
 
     console.log(`${localDate}`)
@@ -50,12 +41,42 @@ const grabAllFromDatabase = async () => {
     
     
     console.log( start.toUTCString() + ':' + end.toUTCString() );
-    dayObject.todaysDate = localDate;
-    dayObject.startUTCTimeDate = start.toUTCString();
-    dayObject.endUTCTimeDate = end.toUTCString();
-    console.log("day object:", dayObject)
+    dayObject.currentDate = localDate;
+    dayObject.startUTCTimeDate = start;
+    dayObject.startUTCTimeDateString = start.toUTCString();
+    dayObject.endUTCTimeDate = end;
+    dayObject.endUTCTimeDateString = end.toUTCString();
+    console.log("dayObject:", dayObject)
+})
 
-    return await supabase.from('time_events').select("*").lt('event_time', end.toUTCString()).gt('event_time', start.toUTCString());
+
+const grabAllFromDatabase = async () => {
+    let localDate = new Date().toLocaleDateString();
+
+    console.log(`${localDate}`)
+
+    
+    let start = new Date(localDate);
+    start.setHours(0,0,0,0);
+    
+    var end = new Date(localDate);
+    end.setHours(23,59,59,999);
+
+    console.log( start.toUTCString() + ':' + end.toUTCString() );
+
+    
+    return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString);
+}
+
+const pushToDatabase = () => {
+    if (currentApplication.device === null) {
+        console.log("Wait for it to register an app!");
+        return;
+    }
+    supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
+        console.log("data: ", data);
+        console.log("error: ", error);
+    })
 }
 
 let devToolsOpen = true;
@@ -70,11 +91,21 @@ const devToolsSwitch = (win) => {
 }
 
 const backOneDay = (() => {
-
+    console.log(dayObject)
+    dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() - 24));
+    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
+    dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() - 24));
+    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    console.log(dayObject)
 })
 
 const forwardOneDay = (() => {
-
+    console.log(dayObject)
+    dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() + 24));
+    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
+    dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() + 24));
+    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    console.log(dayObject)
 })
 
 const createWindow = () => {
@@ -96,8 +127,10 @@ let systemMediaPlaying = false;
 
 app.whenReady().then(() => {
     // TODO ensure the structure of the window being before  the creation of an IPC call is okay
+    setDayObject();
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
-    ipcMain.on('back-one-button', (_) => pushToDatabase())
+    ipcMain.on('back-one-button', (_) => backOneDay())
+    ipcMain.on('forward-one-button', (_) => forwardOneDay())
     ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
