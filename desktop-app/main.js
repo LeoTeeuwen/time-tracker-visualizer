@@ -1,12 +1,12 @@
 require('dotenv').config();
+const ElectronShutdownHandler = require('@paymoapp/electron-shutdown-handler').default;
 const { app, BrowserWindow, powerMonitor, ipcMain } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
 const { createClient } = require('@supabase/supabase-js');
 const os = require('os');
 const path = require('node:path');
-
-
+const fs = require('fs');
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
 
 const dayObject = {
@@ -36,7 +36,7 @@ const setDayObject = (() => {
     let start = new Date(localDate);
     start.setHours(0,0,0,0);
     
-    var end = new Date(localDate);
+    let end = new Date(localDate);
     end.setHours(23,59,59,999);
     
     
@@ -60,22 +60,23 @@ const grabAllFromDatabase = async () => {
     let start = new Date(localDate);
     start.setHours(0,0,0,0);
     
-    var end = new Date(localDate);
+    let end = new Date(localDate);
     end.setHours(23,59,59,999);
 
     
     return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString);
 }
 
-const pushToDatabase = () => {
+const pushToDatabase = async () => {
     if (currentApplication.device === null) {
         console.log("Wait for it to register an app!");
         return;
     }
-    supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
-        console.log("data: ", data);
-        console.log("error: ", error);
-    })
+    await supabase.from('time_events').insert(currentApplication);
+    // supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
+    //     console.log("data: ", data);
+    //     console.log("error: ", error);
+    // })
 }
 
 let devToolsOpen = true;
@@ -134,19 +135,57 @@ app.whenReady().then(() => {
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
     const smtcWorker = new Worker('./smtc-worker.js');
-    
+
+    win.on('close', (event) => {
+        // Prevent the window from closing natively
+        event.preventDefault(); 
+        
+        // Minimize the window to the taskbar instead
+        win.minimize(); 
+    });
+
+	ElectronShutdownHandler.setWindowHandle(win.getNativeWindowHandle());
+    ElectronShutdownHandler.blockShutdown('Please wait for some data to be saved');
+    ElectronShutdownHandler.on('shutdown', async () => {
+		console.log('Shutting down!');
+        currentApplication.state = "shutting_down";
+        await pushToDatabase();
+		ElectronShutdownHandler.releaseShutdown();
+		app.quit();
+	});
 
     smtcWorker.on('message', (data) => {
         systemMediaPlaying = data.isMediaActive;
         currentMediaSources = data.activeSources || [];
     });
-    
+        
+    let closing = false
+
+    let isShuttingDown = false;
+    let isAsyncTaskDone = false;
+
+    // Linux, Mac OS, Windows avoids this because it sucks
+    powerMonitor.on('shutdown', async (event) => {
+        event.preventDefault();        
+
+        currentApplication.state = "shutting_down";
+
+        await pushToDatabase();
+
+        app.quit()
+    });
+
     myInterval = setInterval(() => {
         const runningMediaString = currentMediaSources
             .map(item => `${item.sourceApp} ("${item.title}" by ${item.artist})`)
             .join(' AND ');
         console.log(runningMediaString);
-        console.log(activeWindowSync());
+
+        for (let media of currentMediaSources) {
+            console.log(media)
+        }
+
+        console.log("Active window sync: ", activeWindowSync());
         // Argument is number of seconds before considered idle
         console.log(powerMonitor.getSystemIdleTime());
         const state = powerMonitor.getSystemIdleState(5);

@@ -24,6 +24,14 @@ window.addEventListener('keydown', (event) => {
   }
 })
 
+// Renderer side to call something when app is closing!
+window.addEventListener('beforeunload', (event) => {
+  // Notify the main process via IPC to start saving data immediately
+  // window.electronAPI.sendShutdownSignal(); 
+  // console.log("unloaded!");
+  // window.electronAPI.exampleFunction();
+});
+
 
 async function loadContent() {
   // Update the tag to connect renderer with main process
@@ -37,10 +45,10 @@ async function loadContent() {
     if (entry.state == "active") {
       cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
     } 
-    else if (entry.state == "idle") {
-      cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-    } 
-    else if (entry.state == "closed") {
+    // else if (entry.state == "idle") {
+    //   cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+    // } 
+    else if (entry.state == "shutting_down") {
       cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
     } 
   }
