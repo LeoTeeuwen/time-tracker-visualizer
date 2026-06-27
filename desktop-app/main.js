@@ -56,16 +56,12 @@ const grabCurrentDate = () => {
 const grabAllFromDatabase = async () => {
     let localDate = new Date().toLocaleDateString();
 
-    console.log(`${localDate}`)
-
     
     let start = new Date(localDate);
     start.setHours(0,0,0,0);
     
     var end = new Date(localDate);
     end.setHours(23,59,59,999);
-
-    console.log( start.toUTCString() + ':' + end.toUTCString() );
 
     
     return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString);
@@ -94,29 +90,25 @@ const devToolsSwitch = (win) => {
 }
 
 const backOneDay = (() => {
-    console.log(dayObject)
     dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() - 24));
     dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() - 24));
     dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
     dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
-    console.log(dayObject)
 })
 
 const forwardOneDay = (() => {
-    console.log(dayObject)
     dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() + 24));
     dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() + 24));
     dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
     dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
-    console.log(dayObject)
 })
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 900,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
