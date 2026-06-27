@@ -37,9 +37,10 @@ async function loadContent() {
     let localDateTime = new Date(entry.event_time).toLocaleString();
     cleanedOutput = cleanedOutput + `device: ${entry.device}, datetime ${localDateTime} \n`;
   }
-
-  currentDayText.innerText = "day";
+  
   databaseText.innerText = cleanedOutput;
+  
+  currentDayText.innerText = await window.electronAPI.grabCurrentDate();
 };
 
 

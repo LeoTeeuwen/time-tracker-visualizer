@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   grabAllDataFromDatabase: () => ipcRenderer.invoke('grab-all-from-database'),
   devToolsSwitch: () => ipcRenderer.send('dev-tools-switch'),
   backOneDay: () => ipcRenderer.send('back-one-button'),
-  forwardOneDay: () => ipcRenderer.send('forward-one-button')
+  forwardOneDay: () => ipcRenderer.send('forward-one-button'),
+  grabCurrentDate: () => ipcRenderer.invoke('grab-current-date')
 })

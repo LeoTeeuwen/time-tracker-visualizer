@@ -49,6 +49,9 @@ const setDayObject = (() => {
     console.log("dayObject:", dayObject)
 })
 
+const grabCurrentDate = () => {
+    return dayObject.currentDate;
+}
 
 const grabAllFromDatabase = async () => {
     let localDate = new Date().toLocaleDateString();
@@ -96,6 +99,7 @@ const backOneDay = (() => {
     dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() - 24));
     dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
     console.log(dayObject)
 })
 
@@ -105,6 +109,7 @@ const forwardOneDay = (() => {
     dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() + 24));
     dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
     console.log(dayObject)
 })
 
@@ -132,6 +137,7 @@ app.whenReady().then(() => {
     ipcMain.on('back-one-button', (_) => backOneDay())
     ipcMain.on('forward-one-button', (_) => forwardOneDay())
     ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
+    ipcMain.handle('grab-current-date', (_) => grabCurrentDate())
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
