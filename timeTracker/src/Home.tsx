@@ -7,7 +7,9 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import { DB_PUBLISHABLE_KEY } from '@env';
 import { getApplicationName, getDeviceName } from 'react-native-device-info';
-const { UsageStatsModule } = NativeModules;
+const { UsageStatsModule, DeviceStateModule } = NativeModules;
+
+// For idling maybe this link? https://stackoverflow.com/questions/70917367/react-native-detect-if-a-mobile-device-is-in-use-without-user-interaction-and-w
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', DB_PUBLISHABLE_KEY);
 
@@ -44,18 +46,20 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
       for (let i = 0; BackgroundJob.isRunning(); i++) {
           fetchUsageData().then((packageName: string) => {
             console.log(`Current package is: ${packageName}`);
-            getDeviceName().then((deviceName) => {
-                if (packageName === "UNKNOWN") {
-                  return;
-                }
-                currentApplication = {
-                ...currentApplication,
-                device: deviceName,
-                application_name: packageName,
-                event_time: new Date(),
-                state: "active",
-                app_type: "mobile"
-              };
+            DeviceStateModule.isPhoneSleeping().then((sleepBool: boolean) => {
+              getDeviceName().then((deviceName) => {
+                  if (packageName === "UNKNOWN") {
+                    return;
+                  }
+                  currentApplication = {
+                  ...currentApplication,
+                  device: deviceName,
+                  application_name: packageName,
+                  event_time: new Date(),
+                  state: sleepBool? "idle" : "active",
+                  app_type: "mobile"
+                };
+              })
             })
           });
           await sleep(delay);
