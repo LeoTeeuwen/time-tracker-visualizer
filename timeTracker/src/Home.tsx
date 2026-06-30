@@ -6,13 +6,13 @@ import BackgroundJob from 'react-native-background-actions';
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import { DB_PUBLISHABLE_KEY } from '@env';
+import { getApplicationName, getDeviceName } from 'react-native-device-info';
 const { UsageStatsModule } = NativeModules;
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', DB_PUBLISHABLE_KEY);
 
 let currentApplication: {device: string|null, event_time: Date|null, application_name: string|null, state: string|null, app_type: string|null} = {
-    // TODO get device name
-    device: "phone",
+    device: null,
     event_time: null,
     application_name: null,
     state: null,
@@ -44,13 +44,19 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
       for (let i = 0; BackgroundJob.isRunning(); i++) {
           fetchUsageData().then((packageName: string) => {
             console.log(`Current package is: ${packageName}`);
-            currentApplication = {
-              ...currentApplication,
-              application_name: packageName,
-              event_time: new Date(),
-              state: "active",
-              app_type: "mobile"
-            };
+            getDeviceName().then((deviceName) => {
+                if (packageName === "UNKNOWN") {
+                  return;
+                }
+                currentApplication = {
+                ...currentApplication,
+                device: deviceName,
+                application_name: packageName,
+                event_time: new Date(),
+                state: "active",
+                app_type: "mobile"
+              };
+            })
           });
           await sleep(delay);
       }
@@ -65,6 +71,8 @@ const fetchUsageData = async () => {
   }
 
   const packageName = await UsageStatsModule.getFocusedApp();
+  // TODO maybe use this package instead of the weird custom Kotlin one?? 
+  // return getApplicationName();
   return packageName;
 };
 
