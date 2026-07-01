@@ -63,6 +63,9 @@ class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBase
             val time = System.currentTimeMillis()
             
             // Query for application usage stats in the last 10 seconds
+            // Be warned this can just straight up return an empty list because it is a background process and Android hates that
+            // A recursive solution causes stack overflow so that is a no go, TODO do something smarter here
+            // TODO Figure out why the nexus launcher breaks the tracking system done here!
             val appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time)
             
             if (appList != null && appList.isNotEmpty()) {

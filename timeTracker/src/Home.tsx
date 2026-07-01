@@ -31,7 +31,7 @@ const options = {
     },
     color: '#ff00ff',
     parameters: {
-        delay: 5000,
+        delay: 1000,
     },
     foregroundServiceType: ['dataSync'],
 };
