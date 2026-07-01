@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { NativeModules, StatusBar, TouchableOpacity, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import { NativeModules, StatusBar, TouchableOpacity, StyleSheet, Text, View } from 'react-native';
 import BackgroundJob from 'react-native-background-actions';
 // Needed for supabase
 import 'react-native-url-polyfill/auto';

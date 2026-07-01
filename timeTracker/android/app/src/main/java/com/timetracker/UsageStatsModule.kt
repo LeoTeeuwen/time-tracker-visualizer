@@ -1,26 +1,34 @@
 package com.timetracker
 
 import android.app.usage.UsageStatsManager
-import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.app.AppOpsManager
+import android.content.Context
+import android.os.Process
 import com.facebook.react.bridge.*
 import java.util.*
 import java.util.SortedMap
 import java.util.TreeMap
 import android.app.usage.UsageStats
+import android.util.Log
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
-// class UsageStatsModule() : ReactPackage {
 class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     override fun getName(): String = "UsageStatsModule"
 
     @ReactMethod
     fun checkPermission(promise: Promise) {
-        val usageStatsManager = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val endTime = System.currentTimeMillis()
-        val startTime = endTime - 1000 * 60
-        val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-        promise.resolve(stats != null && stats.isNotEmpty())
+        val appOps = reactApplicationContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            Process.myUid(),
+            reactApplicationContext.packageName
+        )
+
+        promise.resolve(mode == AppOpsManager.MODE_ALLOWED)
     }
 
     @ReactMethod
