@@ -10,12 +10,14 @@ import './config.js';
 
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', env.DB_PUBLISHABLE_KEY);
 
+const PUSH_TO_DATABASE = false;
+
 let currentTab = {
-    device: "gaming",
-    event_time: new Date(),
-    application_name: "new tab",
-    state: "active",
-    app_type: "chrome"
+    device: null,
+    event_time: null,
+    application_name: null,
+    state: null,
+    app_type: null,
 }
 
 async function pushToDatabase() {
@@ -39,8 +41,24 @@ chrome.tabs.onActivated.addListener(
     (activeInfo) => {
         getCurrentTab().then((info) => {
             // Only take inputs when the tab is not loading to not interfere with tab update pushing
-            if (info.status !== "loading") {   
-                console.log(`Current Tab is now ${info.url}`);
+            if (info.status !== "loading") {
+                const urlObj = new URL(info.url);
+                if (urlObj.hostname !== currentTab.application_name) {
+                    console.log(`Current Tab is now ${urlObj.hostname}`);
+                    currentTab = {
+                        ...currentTab,
+                        device: "chrome",
+                        event_time: new Date(),
+                        application_name: urlObj.hostname,
+                        state: "active",
+                        app_type: "chrome"
+                    }
+                    if (PUSH_TO_DATABASE) {
+                        pushToDatabase().then(() => {
+                            console.log("Pushed to database!");
+                        })
+                    }
+                }
             }
         })
     }
@@ -65,15 +83,32 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete') {
         const urlObj = new URL(tab.url);
         // console.log(`${tabId} updated to ${urlObj.hostname}`)
-        console.log(`Current Tab is now ${urlObj.hostname}`)
+        if (urlObj.hostname !== currentTab.application_name) {
+            console.log(`Current Tab is now ${urlObj.hostname}`)
+            currentTab = {
+                ...currentTab,
+                device: "chrome",
+                event_time: new Date(),
+                application_name: urlObj.hostname,
+                state: "active",
+                app_type: "chrome"
+            }
+            if (PUSH_TO_DATABASE) {
+                pushToDatabase().then(() => {
+                    console.log("Pushed to database!");
+                })
+            }
+        }
     }
 });
 
 // Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
     // console.log("windowID: ", windowId);
-    pushToDatabase().then(() => {
-        console.log("All done!");
-    })
+    // if (PUSH_TO_DATABASE) {
+    //     pushToDatabase().then(() => {
+    //         console.log("All done!");
+    //     })
+    // }
     console.log("Focus Changed!");
 });
