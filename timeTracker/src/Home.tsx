@@ -7,6 +7,7 @@ import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import { DB_PUBLISHABLE_KEY } from '@env';
 import { getApplicationName, getDeviceName } from 'react-native-device-info';
+import { PUSH_TO_DATABASE, TIME_BETWEEN_CHECKS } from './Constants';
 const { UsageStatsModule, DeviceStateModule } = NativeModules;
 
 // For idling maybe this link? https://stackoverflow.com/questions/70917367/react-native-detect-if-a-mobile-device-is-in-use-without-user-interaction-and-w
@@ -31,7 +32,7 @@ const options = {
     },
     color: '#ff00ff',
     parameters: {
-        delay: 1000,
+        delay: TIME_BETWEEN_CHECKS,
     },
     foregroundServiceType: ['dataSync'],
 };
@@ -51,14 +52,22 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
                   if (packageName === "UNKNOWN") {
                     return;
                   }
-                  currentApplication = {
-                  ...currentApplication,
-                  device: deviceName,
-                  application_name: packageName,
-                  event_time: new Date(),
-                  state: sleepBool? "idle" : "active",
-                  app_type: "mobile"
-                };
+                  if (packageName !== currentApplication.application_name || currentApplication.application_name === null) {
+                    currentApplication = {
+                      ...currentApplication,
+                      device: deviceName,
+                      application_name: packageName,
+                      event_time: new Date(),
+                      state: sleepBool? "idle" : "active",
+                      app_type: "mobile"
+                    };
+                    // Check the constant if this is what needs to be changed
+                    // TODO make this an array that is pushed every 10 seconds to prevent constant pushes to DB
+                    if (PUSH_TO_DATABASE) {
+                        console.log("Pushing to DB!")
+                        pushToDatabase();
+                    }
+                  }
               })
             })
           });

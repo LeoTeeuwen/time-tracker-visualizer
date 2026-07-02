@@ -1,0 +1,4 @@
+const PUSH_TO_DATABASE = false;
+const TIME_BETWEEN_CHECKS = 1000; //ms
+
+export { PUSH_TO_DATABASE,  TIME_BETWEEN_CHECKS }
