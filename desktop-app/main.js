@@ -8,6 +8,7 @@ const os = require('os');
 const path = require('node:path');
 const fs = require('fs');
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
+const { PUSH_TO_DATABASE } = require('./Constants.ts')
 
 const dayObject = {
     currentDate: null,
@@ -191,14 +192,20 @@ app.whenReady().then(() => {
         const state = powerMonitor.getSystemIdleState(5);
         console.log('Current System State - ', state);
 
-        currentApplication = {
-            device: computerName,
-            event_time: new Date(),
-            application_name: activeWindowSync().owner.name,
-            state: state,
-            app_type: "application"
+        if (activeWindowSync().owner.name !== currentApplication.application_name) {
+            currentApplication = {
+                device: computerName,
+                event_time: new Date(),
+                application_name: activeWindowSync().owner.name,
+                state: state,
+                app_type: "application"
+            }
+            // TODO push in 10 second intervals with an array?
+            if (PUSH_TO_DATABASE) {
+                console.log("Pushing to DB!");
+                pushToDatabase();
+            }
         }
-        console.log(currentApplication)
     }, 5000);
 })
 
