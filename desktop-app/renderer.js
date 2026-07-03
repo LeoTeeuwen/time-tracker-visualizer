@@ -37,7 +37,7 @@ let chart;
 
 const createChart = () => {  
   if (chart) {
-    myChart.destroy();
+    chart.destroy();
   }
   const xyValues = [
   {x:50, y:7},
@@ -54,15 +54,32 @@ const createChart = () => {
   ];
 
   chart = new Chart(chartElement, {
-  type: "scatter",
+  type: "doughnut",
   data: {
-      datasets: [{
-      pointRadius: 4,
-      pointBackgroundColor: "rgba(0,0,255,1)",
-      data: xyValues
-      }]
+    labels: [
+      'Red',
+      'Blue',
+      'Yellow'
+    ],
+    datasets: [{
+      label: 'My First Dataset',
+      data: [300, 50, 100],
+      backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(54, 162, 235)',
+        'rgb(255, 205, 86)'
+      ],
+      hoverOffset: 4
+    }]
   },
   options: {}
+  // data: {
+  //     datasets: [{
+  //     pointRadius: 4,
+  //     pointBackgroundColor: "rgba(0,0,255,1)",
+  //     data: xyValues
+  //     }]
+  // },
   });
 }
 
