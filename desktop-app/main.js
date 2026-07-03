@@ -65,7 +65,7 @@ const grabAllFromDatabase = async () => {
     end.setHours(23,59,59,999);
 
     
-    return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString);
+    return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
 }
 
 const pushToDatabase = async () => {
