@@ -63,7 +63,7 @@ const createChart = () => {
     ],
     datasets: [{
       label: 'My First Dataset',
-      data: [300, 50, 100],
+      data: [35, 50, 100],
       backgroundColor: [
         'rgb(255, 99, 132)',
         'rgb(54, 162, 235)',
@@ -86,24 +86,8 @@ const createChart = () => {
 async function loadContent() {
   // Update the tag to connect renderer with main process
   const data = await window.electronAPI.grabAllDataFromDatabase();
-
-  let cleanedOutput = ""
-
-  for (let entry of data.data) {
-    let localDateTime = new Date(entry.event_time).toLocaleString();
-    console.log(entry);
-    if (entry.state == "active") {
-      cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-    } 
-    // else if (entry.state == "idle") {
-    //   cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-    // } 
-    else if (entry.state == "shutting_down") {
-      cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-    } 
-  }
   
-  databaseText.innerText = cleanedOutput;
+  databaseText.innerText = data;
   
   currentDayText.innerText = await window.electronAPI.grabCurrentDate();
 

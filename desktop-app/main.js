@@ -55,17 +55,29 @@ const grabCurrentDate = () => {
 }
 
 const grabAllFromDatabase = async () => {
-    let localDate = new Date().toLocaleDateString();
+    const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
+    // const { data, error } = await supabase.from('time_events').select("*").lt('event_time', 'Sat, 04 Jul 2026 04:59:59 GMT').gt('event_time', 'Fri, 03 Jul 2026 05:00:00 GM').order('event_time', {ascending: true});
+    // const data = await supabase.from('time_events').select("*");
 
-    
-    let start = new Date(localDate);
-    start.setHours(0,0,0,0);
-    
-    let end = new Date(localDate);
-    end.setHours(23,59,59,999);
+    let cleanedOutput = ""
 
-    
-    return await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
+    console.log(data)
+    for (let entry of data) {
+        let localDateTime = new Date(entry.event_time).toLocaleString();
+        console.log(entry);
+        if (entry.state == "active") {
+        cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+        } 
+        // else if (entry.state == "idle") {
+        //   cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+        // } 
+        else if (entry.state == "shutting_down") {
+        cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+        } 
+    }
+
+
+    return cleanedOutput;
 }
 
 const pushToDatabase = async () => {
