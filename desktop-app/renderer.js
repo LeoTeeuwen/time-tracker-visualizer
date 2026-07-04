@@ -35,63 +35,36 @@ window.addEventListener('beforeunload', (event) => {
 
 let chart;
 
-const createChart = () => {  
+const createChart = (piechartData) => {  
   if (chart) {
     chart.destroy();
   }
-  const xyValues = [
-  {x:50, y:7},
-  {x:60, y:8},
-  {x:70, y:8},
-  {x:80, y:9},
-  {x:90, y:9},
-  {x:100, y:9},
-  {x:110, y:10},
-  {x:120, y:11},
-  {x:130, y:14},
-  {x:140, y:14},
-  {x:150, y:15}
-  ];
 
   chart = new Chart(chartElement, {
   type: "doughnut",
   data: {
-    labels: [
-      'Red',
-      'Blue',
-      'Yellow'
-    ],
+    labels: piechartData.labels,
     datasets: [{
       label: 'My First Dataset',
-      data: [35, 50, 100],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(54, 162, 235)',
-        'rgb(255, 205, 86)'
-      ],
+      data: piechartData.piechartData,
+      backgroundColor: piechartData.backgroundColor,
       hoverOffset: 4
     }]
   },
   options: {}
-  // data: {
-  //     datasets: [{
-  //     pointRadius: 4,
-  //     pointBackgroundColor: "rgba(0,0,255,1)",
-  //     data: xyValues
-  //     }]
-  // },
   });
 }
 
 async function loadContent() {
   // Update the tag to connect renderer with main process
   const data = await window.electronAPI.grabAllDataFromDatabase();
-  
-  databaseText.innerText = data;
+
+  // Set to none as done loading
+  databaseText.innerText = "";
   
   currentDayText.innerText = await window.electronAPI.grabCurrentDate();
 
-  createChart();
+  createChart(data);
 };
 
 

@@ -54,30 +54,62 @@ const grabCurrentDate = () => {
     return dayObject.currentDate;
 }
 
+function random_rgba() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+}
+
+// TODO Make all sections repush at 12am!!!
 const grabAllFromDatabase = async () => {
     const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
-    // const { data, error } = await supabase.from('time_events').select("*").lt('event_time', 'Sat, 04 Jul 2026 04:59:59 GMT').gt('event_time', 'Fri, 03 Jul 2026 05:00:00 GM').order('event_time', {ascending: true});
-    // const data = await supabase.from('time_events').select("*");
 
     let cleanedOutput = ""
 
-    console.log(data)
-    for (let entry of data) {
-        let localDateTime = new Date(entry.event_time).toLocaleString();
-        console.log(entry);
-        if (entry.state == "active") {
-        cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-        } 
+    
+    const labels = []
+    const piechartData = []
+    const backgroundColor= []
+    const orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
+
+    const millisecondsInDay = 86399000;
+
+    for (let i in orderedData) {
+        if (i == orderedData.length-1) {
+            continue;
+        }
+        
+        const entry = orderedData[i]
+        const nextEntry = orderedData[parseInt(i)+1]
+
+        console.log(entry)
+        console.log(nextEntry)
+
+        let localDateTime = new Date(entry.event_time).toLocaleString();        
+
+        const timePercentage = (new Date(nextEntry.event_time).getTime() - new Date(entry.event_time).getTime())/millisecondsInDay
+
+        labels.push(`Opened ${entry.application_name}`);
+        piechartData.push(timePercentage);
+        backgroundColor.push(random_rgba());
+
+
+        // console.log(entry);
+        // if (entry.state == "active") {
+        // cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+        // } 
         // else if (entry.state == "idle") {
         //   cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
         // } 
-        else if (entry.state == "shutting_down") {
-        cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-        } 
+        // else if (entry.state == "shutting_down") {
+        // cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
+        // } 
     }
 
+    console.log("Labels: ", labels)
+    console.log("Data ", piechartData)
+    console.log("Background Colors ", backgroundColor)
 
-    return cleanedOutput;
+    return { labels, piechartData, backgroundColor };
 }
 
 const pushToDatabase = async () => {
