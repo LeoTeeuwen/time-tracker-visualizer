@@ -84,11 +84,13 @@ const grabAllFromDatabase = async () => {
         console.log(entry)
         console.log(nextEntry)
 
-        let localDateTime = new Date(entry.event_time).toLocaleString();        
+        const localDateTime = new Date(entry.event_time).toLocaleString();    
+        const currentEventObject= new Date(entry.event_time)
+        const nextEventObject = new Date(nextEntry.event_time)
 
-        const timePercentage = (new Date(nextEntry.event_time).getTime() - new Date(entry.event_time).getTime())/millisecondsInDay
+        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInDay
 
-        labels.push(`Opened ${entry.application_name}`);
+        labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
         piechartData.push(timePercentage);
         backgroundColor.push(random_rgba());
 

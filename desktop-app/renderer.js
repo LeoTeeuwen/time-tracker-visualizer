@@ -51,7 +51,21 @@ const createChart = (piechartData) => {
       hoverOffset: 4
     }]
   },
-  options: {}
+  options: {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            return ""
+          }
+        }
+      },
+    }
+  }
   });
 }
 
