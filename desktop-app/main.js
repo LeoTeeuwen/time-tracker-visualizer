@@ -75,18 +75,20 @@ const grabAllFromDatabase = async (showDayEnds) => {
     if (showDayEnds) {
         orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
     } else {
-        orderedData = [...data]
+        orderedData = [...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
     }
 
     // If the API returns there was nothing found and user chose to filter out "filler" data
-    console.log(orderedData)
-    if (!orderedData?.length) {
-        labels.push('No activity detected today!')
+    if (!data?.length) {
+        labels.push('No activity detected today!');
         piechartData.push(100);
         backgroundColor.push(random_rgba());
+        
+        orderedData = []
     }
 
     for (let i in orderedData) {
+        // Last one in the order
         if (i == orderedData.length-1) {
             continue;
         }
@@ -94,8 +96,6 @@ const grabAllFromDatabase = async (showDayEnds) => {
         const entry = orderedData[i]
         const nextEntry = orderedData[parseInt(i)+1]
 
-        console.log(entry)
-        console.log(nextEntry)
 
         const localDateTime = new Date(entry.event_time).toLocaleString();    
         const currentEventObject= new Date(entry.event_time)
@@ -103,26 +103,18 @@ const grabAllFromDatabase = async (showDayEnds) => {
 
         const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame
 
-        labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+        if (entry.application_name === "new_day" || entry.application_name === "end_day") {
+            // TODO include idle from X time to X time?
+            // labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+            labels.push(`Idle`);
+        } else {
+            labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+        }
         piechartData.push(timePercentage);
         backgroundColor.push(random_rgba());
-
-
-        // console.log(entry);
-        // if (entry.state == "active") {
-        // cleanedOutput = cleanedOutput + `Opened ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-        // } 
-        // else if (entry.state == "idle") {
-        //   cleanedOutput = cleanedOutput + `Went idle on ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-        // } 
-        // else if (entry.state == "shutting_down") {
-        // cleanedOutput = cleanedOutput + `Closed ${entry.application_name} on device ${entry.device}, on datetime ${localDateTime} \n`;
-        // } 
     }
 
-    console.log("Labels: ", labels)
-    console.log("Data ", piechartData)
-    console.log("Background Colors ", backgroundColor)
+    console.log("Pie chart labels: ", labels)
 
     return { labels, piechartData, backgroundColor };
 }
@@ -133,10 +125,6 @@ const pushToDatabase = async () => {
         return;
     }
     await supabase.from('time_events').insert(currentApplication);
-    // supabase.from('time_events').insert(currentApplication).select().then((data, error) => {
-    //     console.log("data: ", data);
-    //     console.log("error: ", error);
-    // })
 }
 
 let devToolsOpen = true;
