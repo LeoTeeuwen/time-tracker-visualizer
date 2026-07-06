@@ -33,6 +33,18 @@ window.addEventListener('beforeunload', (event) => {
   // window.electronAPI.exampleFunction();
 });
 
+chartElement.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  // console.log("event!: ", e)
+  if (e.ctrlKey) {
+    // How we know it is a pinch! (ctrl + scrollwheel is used under the hood when gesturing a pinch on trackpad)
+    // console.log("Pinched!")
+  }
+})
+// chartElement.addEventListener('click', (e) => {
+//   console.log("event!: ", e)
+// })
+
 let chart;
 
 const createChart = (piechartData) => {  
@@ -52,6 +64,7 @@ const createChart = (piechartData) => {
     }]
   },
   options: {
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         display: false

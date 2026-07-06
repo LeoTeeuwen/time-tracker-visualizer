@@ -51,6 +51,10 @@
 }
 
 .my-chart {
+  justify-self: center;
   width:100%;
   max-width:700px;
+  max-height:700px;
+  transform: scale(1.0);
+  touch-action: pan-x pan-y pinch-zoom; 
 }
