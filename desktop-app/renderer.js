@@ -4,6 +4,7 @@ const backButton = document.getElementById('dateBackBtn')
 const forwardButton = document.getElementById('dateForwardBtn')
 const currentDayText = document.getElementById('currentDayText')
 const chartElement = document.getElementById('chart')
+const showDayEndsBox = document.getElementById('show-day-ends')
 
 setButton.addEventListener('click', () => {
   window.electronAPI.pushToDatabase();
@@ -32,6 +33,11 @@ window.addEventListener('beforeunload', (event) => {
   // console.log("unloaded!");
   // window.electronAPI.exampleFunction();
 });
+
+// Trigger chart reload on check and uncheck
+showDayEndsBox.addEventListener('change', (event) => {
+  loadContent();
+})
 
 chartElement.addEventListener('wheel', (e) => {
   e.preventDefault();
@@ -82,9 +88,9 @@ const createChart = (piechartData) => {
   });
 }
 
-async function loadContent() {
+async function loadContent() {  
   // Update the tag to connect renderer with main process
-  const data = await window.electronAPI.grabAllDataFromDatabase();
+  const data = await window.electronAPI.grabAllDataFromDatabase(showDayEndsBox.checked);
 
   // Set to none as done loading
   databaseText.innerText = "";

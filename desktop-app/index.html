@@ -22,7 +22,14 @@
       
       <button id="dateForwardBtn" class="nav-btn">Forward &#8594;</button>
     </div>
-    <button id="basicDBButton" type="button">Push me for DB shenanigan!</button>
+    <div class="top-bar-check">
+      <button id="basicDBButton" type="button">Push me for DB shenanigan!</button>
+      <div class="check-box-div">
+        <input type="checkbox" id="show-day-ends" name="show-day-ends" value="show-day-ends" checked>
+        <label for="show-day-ends">Show start and end day slices?</label><br>
+      </div>
+    </div>
+      
     <p id="databaseOutputText">Loading...</p>
 
     <canvas id="chart" class="my-chart"></canvas>

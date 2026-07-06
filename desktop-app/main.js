@@ -60,18 +60,31 @@ function random_rgba() {
 }
 
 // TODO Make all sections repush at 12am!!!
-const grabAllFromDatabase = async () => {
+const grabAllFromDatabase = async (showDayEnds) => {
     const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
 
     let cleanedOutput = ""
-
     
     const labels = []
     const piechartData = []
     const backgroundColor= []
-    const orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
+    let orderedData;
 
-    const millisecondsInDay = 86399000;
+    const millisecondsInFrame = 86399000;
+    
+    if (showDayEnds) {
+        orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
+    } else {
+        orderedData = [...data]
+    }
+
+    // If the API returns there was nothing found and user chose to filter out "filler" data
+    console.log(orderedData)
+    if (!orderedData?.length) {
+        labels.push('No activity detected today!')
+        piechartData.push(100);
+        backgroundColor.push(random_rgba());
+    }
 
     for (let i in orderedData) {
         if (i == orderedData.length-1) {
@@ -88,7 +101,7 @@ const grabAllFromDatabase = async () => {
         const currentEventObject= new Date(entry.event_time)
         const nextEventObject = new Date(nextEntry.event_time)
 
-        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInDay
+        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame
 
         labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
         piechartData.push(timePercentage);
@@ -176,7 +189,7 @@ app.whenReady().then(() => {
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
     ipcMain.on('back-one-button', (_) => backOneDay())
     ipcMain.on('forward-one-button', (_) => forwardOneDay())
-    ipcMain.handle('grab-all-from-database', (_) => grabAllFromDatabase())
+    ipcMain.handle('grab-all-from-database', (_, showDayEnds) => grabAllFromDatabase(showDayEnds))
     ipcMain.handle('grab-current-date', (_) => grabCurrentDate())
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
