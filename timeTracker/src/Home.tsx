@@ -49,22 +49,24 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
             console.log(`Current package is: ${packageName}`);
             DeviceStateModule.isPhoneSleeping().then((sleepBool: boolean) => {
               getDeviceName().then((deviceName) => {
+                  // Result of android deleting the request while it runs
                   if (packageName === "UNKNOWN") {
                     return;
                   }
-                  if (packageName !== currentApplication.application_name || currentApplication.application_name === null) {
+                  const sleepState = sleepBool? "shut_down" : "active"
+                  if (packageName !== currentApplication.application_name || currentApplication.application_name === null || sleepState !== currentApplication.state) {
                     currentApplication = {
                       ...currentApplication,
                       device: deviceName,
                       application_name: packageName,
                       event_time: new Date(),
-                      state: sleepBool? "idle" : "active",
+                      state: sleepState,
                       app_type: "mobile"
                     };
                     // Check the constant if this is what needs to be changed
                     // TODO make this an array that is pushed every 10 seconds to prevent constant pushes to DB
                     if (PUSH_TO_DATABASE) {
-                        console.log("Pushing to DB!")
+                      console.log("Pushing to DB!");
                         pushToDatabase();
                     }
                   }
