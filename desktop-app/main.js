@@ -63,23 +63,23 @@ function random_rgba() {
 const grabAllFromDatabase = async (showDayEnds) => {
     const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
 
-    let cleanedOutput = ""
+    let cleanedOutput = "";
     
-    const labels = []
-    const piechartData = []
-    const backgroundColor= []
+    const labels = [];
+    const piechartData = [];
+    const backgroundColor= [];
     let orderedData;
 
     const millisecondsInFrame = 86399000;
     
-    orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}]
+    orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}];
 
     if (!data?.length) {
         labels.push('No activity detected today!');
         piechartData.push(100);
         backgroundColor.push(random_rgba());
         
-        orderedData = []
+        orderedData = [];
     }
 
     for (let i in orderedData) {
@@ -88,25 +88,22 @@ const grabAllFromDatabase = async (showDayEnds) => {
             continue;
         }
         
-        const entry = orderedData[i]
-        const nextEntry = orderedData[parseInt(i)+1]
-
-        if (entry.state === "shutting_down") {
-            continue;
-        }
+        const entry = orderedData[i];
+        const nextEntry = orderedData[parseInt(i)+1];
 
         const localDateTime = new Date(entry.event_time).toLocaleString();    
-        const currentEventObject= new Date(entry.event_time)
-        const nextEventObject = new Date(nextEntry.event_time)
+        const currentEventObject= new Date(entry.event_time);
+        const nextEventObject = new Date(nextEntry.event_time);
 
-        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame
+        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame;
 
-        if (entry.application_name === "new_day" || entry.application_name === "end_day") {
+        if (entry.application_name === "new_day" || entry.application_name === "end_day" || entry.state === "shutting_down") {
             // TODO include idle from X time to X time?
-            // labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
             labels.push(`Idle`);
+            // console.log("Idle");
         } else {
             labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+            // console.log(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
         }
         piechartData.push(timePercentage);
         backgroundColor.push(random_rgba());
@@ -124,7 +121,9 @@ const grabAllFromDatabase = async (showDayEnds) => {
             backgroundColor.splice(labels.length - 1, 1); 
         }
     }
-    
+
+    // console.log(labels)
+
     return { labels, piechartData, backgroundColor };
 }
 
