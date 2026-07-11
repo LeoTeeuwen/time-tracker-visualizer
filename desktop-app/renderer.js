@@ -96,7 +96,7 @@ async function loadContent() {
   databaseText.innerText = "";
   
   currentDayText.innerText = await window.electronAPI.grabCurrentDate();
-
+  
   createChart(data);
 };
 

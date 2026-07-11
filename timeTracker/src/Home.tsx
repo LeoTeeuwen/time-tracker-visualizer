@@ -53,7 +53,7 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
                   if (packageName === "UNKNOWN") {
                     return;
                   }
-                  const sleepState = sleepBool? "shut_down" : "active"
+                  const sleepState = sleepBool? "shutting_down" : "active"
                   if (packageName !== currentApplication.application_name || currentApplication.application_name === null || sleepState !== currentApplication.state) {
                     currentApplication = {
                       ...currentApplication,
