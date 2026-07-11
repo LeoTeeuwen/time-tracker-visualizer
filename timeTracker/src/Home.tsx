@@ -67,7 +67,7 @@ const veryIntensiveTask = async (taskDataArguments: any) => {
                     // TODO make this an array that is pushed every 10 seconds to prevent constant pushes to DB
                     if (PUSH_TO_DATABASE) {
                       console.log("Pushing to DB!");
-                        pushToDatabase();
+                      pushToDatabase();
                     }
                   }
               })
