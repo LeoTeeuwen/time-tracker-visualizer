@@ -239,7 +239,7 @@ app.whenReady().then(() => {
         const state = powerMonitor.getSystemIdleState(5);
         console.log('Current System State - ', state);
 
-        if (activeWindowSync().owner.name !== currentApplication.application_name) {
+        if (activeWindowSync().owner && activeWindowSync().owner.name && activeWindowSync().owner.name !== currentApplication.application_name) {
             currentApplication = {
                 device: computerName,
                 event_time: new Date(),
