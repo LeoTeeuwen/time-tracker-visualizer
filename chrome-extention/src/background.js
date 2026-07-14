@@ -20,6 +20,10 @@ let currentTab = {
     app_type: null,
 }
 
+// setInterval(() => {
+// TODO Put code here to push to the database every 10 seconds with some queueing logic to prevent useless duplicate pushes! (specifically from focus trigger)
+// }, 1000)
+
 async function pushToDatabase() {
     supabase.from('time_events').insert(currentTab).select().then((data, error) => {
         console.log("data: ", data);
@@ -98,7 +102,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 });
 
-// Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
+// Tracks when chrome tabs are changed focus
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
     let tabs = await chrome.tabs.query({ active: true, windowId: windowId });
 

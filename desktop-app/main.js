@@ -99,11 +99,16 @@ const grabAllFromDatabase = async (showDayEnds) => {
 
         if (entry.application_name === "new_day" || entry.application_name === "end_day" || entry.state === "shutting_down") {
             // TODO include idle from X time to X time?
-            labels.push(`Idle`);
+            labels.push(`No Activity`);
             // console.log("Idle");
         } else {
-            labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
-            // console.log(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+            if (entry.state === "idle") {
+                labels.push(`Idle on ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+                // console.log(`Idle on ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+            } else {
+                labels.push(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+                // console.log(`Using ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
+            }
         }
         piechartData.push(timePercentage);
         backgroundColor.push(random_rgba());
