@@ -44,7 +44,7 @@ chrome.tabs.onActivated.addListener(
             if (info.status !== "loading") {
                 const urlObj = new URL(info.url);
                 if (urlObj.hostname !== currentTab.application_name) {
-                    console.log(`Current Tab is now ${urlObj.hostname}`);
+                    console.log(`Current Tab is now ${urlObj.hostname} (activated)`);
                     currentTab = {
                         ...currentTab,
                         device: "chrome",
@@ -54,9 +54,7 @@ chrome.tabs.onActivated.addListener(
                         app_type: "chrome"
                     }
                     if (PUSH_TO_DATABASE) {
-                        pushToDatabase().then(() => {
-                            console.log("Pushed to database!");
-                        })
+                        pushToDatabase();
                     }
                 }
             }
@@ -84,7 +82,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         const urlObj = new URL(tab.url);
         // console.log(`${tabId} updated to ${urlObj.hostname}`)
         if (urlObj.hostname !== currentTab.application_name) {
-            console.log(`Current Tab is now ${urlObj.hostname}`)
+            console.log(`Current Tab is now ${urlObj.hostname} (on update)`)
             currentTab = {
                 ...currentTab,
                 device: "chrome",
@@ -94,9 +92,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 app_type: "chrome"
             }
             if (PUSH_TO_DATABASE) {
-                pushToDatabase().then(() => {
-                    console.log("Pushed to database!");
-                })
+                pushToDatabase();
             }
         }
     }
@@ -104,11 +100,17 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Tracks when chrome is focused in general or not (seems useful for dual monitor maybe?)
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
-    // console.log("windowID: ", windowId);
-    // if (PUSH_TO_DATABASE) {
-    //     pushToDatabase().then(() => {
-    //         console.log("All done!");
-    //     })
-    // }
-    console.log("Focus Changed!");
+    let tabs = await chrome.tabs.query({ active: true, windowId: windowId });
+
+    if (tabs.length === 0) {
+        return;
+    }
+
+    const urlObj = new URL(tabs[0].url);
+
+    console.log(`Current Tab is now ${urlObj.hostname} (focus change)`)
+    
+    if (PUSH_TO_DATABASE) {
+        pushToDatabase();
+    }
 });
