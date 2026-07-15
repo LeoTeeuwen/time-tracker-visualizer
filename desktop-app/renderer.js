@@ -3,7 +3,8 @@ const databaseText = document.getElementById('databaseOutputText')
 const backButton = document.getElementById('dateBackBtn')
 const forwardButton = document.getElementById('dateForwardBtn')
 const currentDayText = document.getElementById('currentDayText')
-const chartElement = document.getElementById('chart')
+const pieChartElement = document.getElementById('pie-chart')
+const barChartElement = document.getElementById('bar-chart')
 const showDayEndsBox = document.getElementById('show-day-ends')
 
 setButton.addEventListener('click', () => {
@@ -39,7 +40,7 @@ showDayEndsBox.addEventListener('change', (event) => {
   loadContent();
 })
 
-chartElement.addEventListener('wheel', (e) => {
+pieChartElement.addEventListener('wheel', (e) => {
   e.preventDefault();
   // console.log("event!: ", e)
   if (e.ctrlKey) {
@@ -51,14 +52,14 @@ chartElement.addEventListener('wheel', (e) => {
 //   console.log("event!: ", e)
 // })
 
-let chart;
+let pieChart;
 
-const createChart = (piechartData) => {  
-  if (chart) {
-    chart.destroy();
+const createPieChart = (piechartData) => {  
+  if (pieChart) {
+    pieChart.destroy();
   }
 
-  chart = new Chart(chartElement, {
+  pieChart = new Chart(pieChartElement, {
   type: "doughnut",
   data: {
     labels: piechartData.labels,
@@ -88,16 +89,65 @@ const createChart = (piechartData) => {
   });
 }
 
+let barChart;
+
+const createBarChart = (data) => {
+  if (barChart) {
+    barChart.destroy();
+  }
+  
+  new Chart(barChartElement, {
+      type: 'bar',
+      data: {
+          labels: ['Time Spent'],
+          datasets: [
+              {
+                  label: 'Dataset 1',
+                  data: [12],
+                  backgroundColor: 'rgba(255, 99, 132, 0.7)'
+              },
+              {
+                  label: 'Dataset 2',
+                  data: [7],
+                  backgroundColor: 'rgba(54, 162, 235, 0.7)'
+              },
+              {
+                  label: 'Dataset 3',
+                  data: [5],
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)'
+              }
+          ]
+      },
+      options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+              x: {
+                  stacked: true
+              },
+              y: {
+                  stacked: true
+              }
+          }
+      }
+  });
+}
+
 async function loadContent() {  
   // Update the tag to connect renderer with main process
-  const data = await window.electronAPI.grabAllDataFromDatabase(showDayEndsBox.checked);
-
+  const pieChartData = await window.electronAPI.grabAllDataFromDatabase(showDayEndsBox.checked);
+  // const barChartData = await window.electronAPI.grabBarChartTimeBreakdown()
   // Set to none as done loading
   databaseText.innerText = "";
   
   currentDayText.innerText = await window.electronAPI.grabCurrentDate();
   
-  createChart(data);
+  createPieChart(pieChartData);
+  createBarChart(pieChartData);
 };
 
 
