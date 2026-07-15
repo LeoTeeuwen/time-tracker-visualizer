@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   backOneDay: () => ipcRenderer.send('back-one-button'),
   forwardOneDay: () => ipcRenderer.send('forward-one-button'),
   grabCurrentDate: () => ipcRenderer.invoke('grab-current-date'),
+  grabBarChartTimeBreakdown: () => ipcRenderer.invoke('grab-bar-chart-data')
 })

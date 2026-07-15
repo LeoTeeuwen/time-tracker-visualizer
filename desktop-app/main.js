@@ -132,6 +132,28 @@ const grabAllFromDatabase = async (showDayEnds) => {
     return { labels, piechartData, backgroundColor };
 }
 
+const grabBarChartTimeBreakdown = async () => {
+    let data = [
+              {
+                  label: 'Dataset 1',
+                  data: [12],
+                  backgroundColor: 'rgba(255, 99, 132, 0.7)'
+              },
+              {
+                  label: 'Dataset 2',
+                  data: [7],
+                  backgroundColor: 'rgba(54, 162, 235, 0.7)'
+              },
+              {
+                  label: 'Dataset 3',
+                  data: [5],
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)'
+              }
+          ]
+
+    return data;
+}
+
 const pushToDatabase = async () => {
     if (currentApplication.device === null) {
         console.log("Wait for it to register an app!");
@@ -192,6 +214,7 @@ app.whenReady().then(() => {
     ipcMain.on('forward-one-button', (_) => forwardOneDay())
     ipcMain.handle('grab-all-from-database', (_, showDayEnds) => grabAllFromDatabase(showDayEnds))
     ipcMain.handle('grab-current-date', (_) => grabCurrentDate())
+    ipcMain.handle('grab-bar-chart-data', (_) => grabBarChartTimeBreakdown())
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     

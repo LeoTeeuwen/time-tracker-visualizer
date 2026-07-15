@@ -100,23 +100,7 @@ const createBarChart = (data) => {
       type: 'bar',
       data: {
           labels: ['Time Spent'],
-          datasets: [
-              {
-                  label: 'Dataset 1',
-                  data: [12],
-                  backgroundColor: 'rgba(255, 99, 132, 0.7)'
-              },
-              {
-                  label: 'Dataset 2',
-                  data: [7],
-                  backgroundColor: 'rgba(54, 162, 235, 0.7)'
-              },
-              {
-                  label: 'Dataset 3',
-                  data: [5],
-                  backgroundColor: 'rgba(75, 192, 192, 0.7)'
-              }
-          ]
+          datasets: data
       },
       options: {
           responsive: true,
@@ -140,14 +124,15 @@ const createBarChart = (data) => {
 async function loadContent() {  
   // Update the tag to connect renderer with main process
   const pieChartData = await window.electronAPI.grabAllDataFromDatabase(showDayEndsBox.checked);
-  // const barChartData = await window.electronAPI.grabBarChartTimeBreakdown()
+  const barChartData = await window.electronAPI.grabBarChartTimeBreakdown();
+
   // Set to none as done loading
   databaseText.innerText = "";
   
   currentDayText.innerText = await window.electronAPI.grabCurrentDate();
   
   createPieChart(pieChartData);
-  createBarChart(pieChartData);
+  createBarChart(barChartData);
 };
 
 
