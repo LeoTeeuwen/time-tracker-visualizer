@@ -96,7 +96,7 @@ const createBarChart = (data) => {
     barChart.destroy();
   }
   
-  new Chart(barChartElement, {
+  barChart = new Chart(barChartElement, {
       type: 'bar',
       data: {
           labels: ['Time Spent'],

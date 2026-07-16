@@ -59,6 +59,15 @@
   touch-action: pan-x pan-y pinch-zoom; 
 }
 
+.my-bar-chart {
+  justify-self: center;
+  width:100%;
+  max-width:300px;
+  max-height:700px;
+  transform: scale(1.0);
+  touch-action: pan-x pan-y pinch-zoom; 
+}
+
 .check-box-div {
   background-color: #ffffff;
   padding-right: 2%;

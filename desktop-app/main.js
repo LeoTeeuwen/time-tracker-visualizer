@@ -133,25 +133,61 @@ const grabAllFromDatabase = async (showDayEnds) => {
 }
 
 const grabBarChartTimeBreakdown = async () => {
-    let data = [
-              {
-                  label: 'Dataset 1',
-                  data: [12],
-                  backgroundColor: 'rgba(255, 99, 132, 0.7)'
-              },
-              {
-                  label: 'Dataset 2',
-                  data: [7],
-                  backgroundColor: 'rgba(54, 162, 235, 0.7)'
-              },
-              {
-                  label: 'Dataset 3',
-                  data: [5],
-                  backgroundColor: 'rgba(75, 192, 192, 0.7)'
-              }
-          ]
+    const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
+    
+    if (!data?.length) {
+        return [{
+            label: "No activity detected today!",
+            data: [24],
+            backgroundColor: random_rgba() 
+        }]
+    }
 
-    return data;
+    const millisecondsInFrame = 86399000;
+    
+    orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "No Activity", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "No Activity", state: "end_day", app_type: "end_day"}];
+
+    const applicationTimeObject = {}
+
+    for (let i in orderedData) {
+        if (i == orderedData.length-1) {
+            continue;
+        }
+        
+        const entry = orderedData[i];
+        const nextEntry = orderedData[parseInt(i)+1];
+
+        const currentEventObject= new Date(entry.event_time);
+        const nextEventObject = new Date(nextEntry.event_time);
+
+        // const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame;
+        const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime());
+
+        // applicationTimeObject[`${entry.application_name}`] += 
+        if (Object.hasOwn(applicationTimeObject, entry.application_name)) {
+            applicationTimeObject[`${entry.application_name}`] += timePercentage;
+        } else {
+            applicationTimeObject[`${entry.application_name}`] = timePercentage;
+        }
+        
+    }
+
+    // console.log("Application Object", applicationTimeObject)
+
+    // Make the object fit into the format of the data for the Bar Chart
+    const formattedData = []
+
+    for (const [key, value] of Object.entries(applicationTimeObject)) {
+        formattedData.push({
+            label: key,
+            data: [value/3600000], // 1000milsec/sec * 60sec/min * 60min/hr
+            backgroundColor: random_rgba()
+        });
+    }
+
+    // console.log(formattedData);
+    
+    return formattedData;
 }
 
 const pushToDatabase = async () => {
