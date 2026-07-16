@@ -64,7 +64,7 @@ const createPieChart = (piechartData) => {
   data: {
     labels: piechartData.labels,
     datasets: [{
-      label: 'My First Dataset',
+      label: 'Full Day Activity',
       data: piechartData.piechartData,
       backgroundColor: piechartData.backgroundColor,
       hoverOffset: 4
@@ -99,7 +99,7 @@ const createBarChart = (data) => {
   barChart = new Chart(barChartElement, {
       type: 'bar',
       data: {
-          labels: ['Time Spent'],
+          labels: ['Time Spent (Hours)'],
           datasets: data
       },
       options: {
@@ -107,7 +107,24 @@ const createBarChart = (data) => {
           plugins: {
             legend: {
               display: false
-            }
+            },
+            tooltip: {
+              displayColors: false,
+            },
+            zoom: {
+              pan: {
+                enabled: true,
+                mode: 'x'
+              },
+              zoom: {
+                wheel: {
+                  enabled: true,
+                },
+                pinch: {
+                  enabled: true 
+                },
+                mode: 'y',
+              }
           },
           scales: {
               x: {
@@ -118,6 +135,7 @@ const createBarChart = (data) => {
               }
           }
       }
+    }
   });
 }
 
