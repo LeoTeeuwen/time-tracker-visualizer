@@ -6,6 +6,7 @@ const currentDayText = document.getElementById('currentDayText')
 const pieChartElement = document.getElementById('pie-chart')
 const barChartElement = document.getElementById('bar-chart')
 const showDayEndsBox = document.getElementById('show-day-ends')
+const resetBarChartZoomButton = document.getElementById('reset-barchart-zoom')
 
 setButton.addEventListener('click', () => {
   window.electronAPI.pushToDatabase();
@@ -19,6 +20,10 @@ backButton.addEventListener('click', () => {
 forwardButton.addEventListener('click', () => {
   window.electronAPI.forwardOneDay();
   loadContent();
+})
+
+resetBarChartZoomButton.addEventListener('click', () => {
+  barChart.resetZoom();
 })
 
 window.addEventListener('keydown', (event) => {
