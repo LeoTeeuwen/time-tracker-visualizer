@@ -312,11 +312,14 @@ app.whenReady().then(() => {
         const state = powerMonitor.getSystemIdleState(5);
         console.log('Current System State - ', state);
 
-        if (activeWindowSync().owner && activeWindowSync().owner.name && activeWindowSync().owner.name !== currentApplication.application_name && activeWindowSync().owner.name !== "Google Chrome") {
+        const currentWindowSyncCall = activeWindowSync();
+
+        // TODO ensure that Google Chrome should be included in this logic
+        if (currentWindowSyncCall && currentWindowSyncCall.owner && currentWindowSyncCall.owner.name && currentWindowSyncCall.owner.name !== currentApplication.application_name && currentWindowSyncCall.owner.name !== "Google Chrome") {
             currentApplication = {
                 device: computerName,
                 event_time: new Date(),
-                application_name: activeWindowSync().owner.name,
+                application_name: currentWindowSyncCall.owner.name,
                 state: state,
                 app_type: "application"
             }
