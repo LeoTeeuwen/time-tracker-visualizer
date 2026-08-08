@@ -1,6 +1,6 @@
 require('dotenv').config();
 const ElectronShutdownHandler = require('@paymoapp/electron-shutdown-handler').default;
-const { app, BrowserWindow, powerMonitor, ipcMain } = require('electron')
+const { app, BrowserWindow, powerMonitor, ipcMain, Tray, Menu } = require('electron')
 const { Worker } = require('worker_threads');
 const { activeWindowSync } = require('get-windows');
 const { createClient } = require('@supabase/supabase-js');
@@ -257,12 +257,33 @@ app.whenReady().then(() => {
     
     const smtcWorker = new Worker('./smtc-worker.js');
 
+    // TODO Is this necessary?
+    // const contextMenu = Menu.buildFromTemplate([
+    //     { label: 'Show App', click: () => {
+    //         win.show();
+    //         win.setSkipTaskbar(false);
+    //     }},
+    //     { label: 'Quit', click: () => {
+    //         app.isQuitting = true;
+    //         app.quit();
+    //     }}
+    // ]);
+
+    // tray.setContextMenu(contextMenu);
+
+    tray = new Tray('./icon.ico');
+    tray.setToolTip('Time Tracker');
+    
+    tray.on('double-click', () => {
+        win.show();
+        win.setSkipTaskbar(false);
+    });
+    
     win.on('close', (event) => {
         // Prevent the window from closing natively
         event.preventDefault(); 
-        
-        // Minimize the window to the taskbar instead
-        win.minimize(); 
+        win.hide();
+        win.setSkipTaskbar(true);
     });
 
 	ElectronShutdownHandler.setWindowHandle(win.getNativeWindowHandle());
