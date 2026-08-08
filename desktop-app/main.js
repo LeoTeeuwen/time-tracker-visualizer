@@ -8,7 +8,7 @@ const os = require('os');
 const path = require('node:path');
 const fs = require('fs');
 const supabase = createClient('https://dhyrzbqugxgtjaurnczc.supabase.co', process.env.DB_PUBLISHABLE_KEY)
-const { PUSH_TO_DATABASE } = require('./Constants.ts')
+const { PUSH_TO_DATABASE, DEBUG } = require('./Constants.ts')
 
 const dayObject = {
     currentDate: null,
@@ -28,9 +28,10 @@ let currentApplication = {
 
 const computerName = os.hostname()
 
-const setDayObject = (() => {
-    let localDate = new Date().toLocaleDateString();
+const setInitialDayObject = (() => {
 
+    // July 8th as that is a day with a full example usage of the app
+    let localDate = DEBUG? new Date(2026, 6, 8).toLocaleDateString() : new Date().toLocaleDateString();
     console.log(`${localDate}`)
 
     
@@ -244,7 +245,7 @@ let systemMediaPlaying = false;
 
 app.whenReady().then(() => {
     // TODO ensure the structure of the window being before  the creation of an IPC call is okay
-    setDayObject();
+    setInitialDayObject();
     ipcMain.on('push-to-db-button', (_) => pushToDatabase())
     ipcMain.on('back-one-button', (_) => backOneDay())
     ipcMain.on('forward-one-button', (_) => forwardOneDay())
