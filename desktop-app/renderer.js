@@ -147,7 +147,7 @@ const createBarChart = (data) => {
 async function loadContent() {  
   // Update the tag to connect renderer with main process
   const pieChartData = await window.electronAPI.grabAllDataFromDatabase(showDayEndsBox.checked);
-  const barChartData = await window.electronAPI.grabBarChartTimeBreakdown();
+  const barChartData = await window.electronAPI.grabBarChartTimeBreakdown(showDayEndsBox.checked);
 
   // Set to none as done loading
   databaseText.innerText = "";

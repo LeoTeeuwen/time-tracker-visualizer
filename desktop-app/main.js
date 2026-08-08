@@ -133,7 +133,7 @@ const grabAllFromDatabase = async (showDayEnds) => {
     return { labels, piechartData, backgroundColor };
 }
 
-const grabBarChartTimeBreakdown = async () => {
+const grabBarChartTimeBreakdown = async (showDayEnds) => {
     const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
     
     if (!data?.length) {
@@ -161,10 +161,13 @@ const grabBarChartTimeBreakdown = async () => {
         const currentEventObject= new Date(entry.event_time);
         const nextEventObject = new Date(nextEntry.event_time);
 
-        // const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame;
         const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime());
 
-        // applicationTimeObject[`${entry.application_name}`] += 
+        // Skipping events of the new day and end day object should the user un-check the box
+        if ((entry.device === "new_day" || entry.device === "end_day") && !showDayEnds) {
+            continue;
+        }
+
         if (Object.hasOwn(applicationTimeObject, entry.application_name)) {
             applicationTimeObject[`${entry.application_name}`] += timePercentage;
         } else {
@@ -251,7 +254,7 @@ app.whenReady().then(() => {
     ipcMain.on('forward-one-button', (_) => forwardOneDay())
     ipcMain.handle('grab-all-from-database', (_, showDayEnds) => grabAllFromDatabase(showDayEnds))
     ipcMain.handle('grab-current-date', (_) => grabCurrentDate())
-    ipcMain.handle('grab-bar-chart-data', (_) => grabBarChartTimeBreakdown())
+    ipcMain.handle('grab-bar-chart-data', (_, showDayEnds) => grabBarChartTimeBreakdown(showDayEnds))
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
