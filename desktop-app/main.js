@@ -12,8 +12,11 @@ const { PUSH_TO_DATABASE, DEBUG } = require('./Constants.ts')
 
 const dayObject = {
     currentDate: null,
+    prevDate: null,
     startUTCTimeDateString: null,
     startUTCTimeDate: null,
+    yesterdayUTCTimeDate: null,
+    yesterdayUTCTimeDateString: null,
     endUTCTimeDateString: null,
     endUTCTimeDate: null
 }
@@ -38,14 +41,20 @@ const setInitialDayObject = (() => {
     let start = new Date(localDate);
     start.setHours(0,0,0,0);
     
+    let yesterday = new Date(localDate);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
     let end = new Date(localDate);
     end.setHours(23,59,59,999);
     
     
     console.log( start.toUTCString() + ':' + end.toUTCString() );
     dayObject.currentDate = localDate;
+    dayObject.prevDate = yesterday;
     dayObject.startUTCTimeDate = start;
     dayObject.startUTCTimeDateString = start.toUTCString();
+    dayObject.yesterdayUTCTimeDate = yesterday;
+    dayObject.yesterdayUTCTimeDateString = yesterday.toUTCString();
     dayObject.endUTCTimeDate = end;
     dayObject.endUTCTimeDateString = end.toUTCString();
     console.log("dayObject:", dayObject)
@@ -60,12 +69,44 @@ function random_rgba() {
     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
 }
 
-// TODO Make all sections repush at 12am!!!
-const grabAllFromDatabase = async (showDayEnds) => {
-    const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.startUTCTimeDateString).order('event_time', {ascending: true});
+const splitYesterdayTodayActivity = (data) => {
+    let yesterdayActivity = [];
+    let todayActivity = [];
 
-    let cleanedOutput = "";
-    
+    for (i in data) {
+        if (new Date(data[i].event_time) < dayObject.startUTCTimeDate) {
+            yesterdayActivity.push(data[i]);
+        } else {
+            todayActivity.push(data[i]);
+        }
+    }
+    return { yesterdayData: yesterdayActivity, todayData: todayActivity };
+}
+
+const grabAllFromDatabase = async (showDayEnds) => {
+    const { data, error } = await supabase.from('time_events').select("*").lt('event_time', dayObject.endUTCTimeDateString).gt('event_time', dayObject.yesterdayUTCTimeDateString).order('event_time', {ascending: true});
+
+    // Done to avoid 2x the database calls
+    let { yesterdayData, todayData } = splitYesterdayTodayActivity(data);
+
+    let fullActivityData;
+
+    // Checking if there needs to be an overflow into the next day (user on an app through midnight)
+    if (yesterdayData.length > 0 && yesterdayData[yesterdayData.length - 1].state !== "shutting_down") {
+        let overActivityEntry = yesterdayData[yesterdayData.length - 1];
+        let correctedMidnightEntry = {
+            device: overActivityEntry.device,
+            event_time: dayObject.startUTCTimeDate,
+            application_name: overActivityEntry.application_name,
+            state: overActivityEntry.state,
+            app_type: overActivityEntry.app_type,
+        }
+        console.log(correctedMidnightEntry)
+        fullActivityData = [correctedMidnightEntry, ...todayData];
+    } else {
+        fullActivityData = [...todayData]
+    }
+
     const labels = [];
     const piechartData = [];
     const backgroundColor= [];
@@ -73,9 +114,9 @@ const grabAllFromDatabase = async (showDayEnds) => {
 
     const millisecondsInFrame = 86399000;
     
-    orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...data, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}];
+    orderedData = [{device: "new_day", event_time: dayObject.startUTCTimeDateString, application_name: "new_day", state: "new_day", app_type: "new_day"}, ...fullActivityData, {device: "end_day", event_time: dayObject.endUTCTimeDateString, application_name: "end_day", state: "end_day", app_type: "end_day"}];
 
-    if (!data?.length) {
+    if (!fullActivityData?.length) {
         labels.push('No activity detected today!');
         piechartData.push(100);
         backgroundColor.push(random_rgba());
@@ -215,17 +256,21 @@ const devToolsSwitch = (win) => {
 
 const backOneDay = (() => {
     dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() - 24));
-    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
+    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString();
+    dayObject.yesterdayUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() - 24));
+    dayObject.yesterdayUTCTimeDateString = dayObject.yesterdayUTCTimeDate.toUTCString();
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() - 24));
-    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString();
     dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
 })
 
 const forwardOneDay = (() => {
     dayObject.startUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() + 24));
-    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString()
+    dayObject.startUTCTimeDateString = dayObject.startUTCTimeDate.toUTCString();
+    dayObject.yesterdayUTCTimeDate.setHours((dayObject.startUTCTimeDate.getHours() - 24));
+    dayObject.yesterdayUTCTimeDateString = dayObject.yesterdayUTCTimeDate.toUTCString();
     dayObject.endUTCTimeDate.setHours((dayObject.endUTCTimeDate.getHours() + 24));
-    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString()
+    dayObject.endUTCTimeDateString = dayObject.endUTCTimeDate.toUTCString();
     dayObject.currentDate = dayObject.startUTCTimeDate.toLocaleDateString();
 })
 
