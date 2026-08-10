@@ -303,26 +303,25 @@ app.whenReady().then(() => {
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
-    const absolutePath = path.resolve(__dirname, './smtc-worker.js'); 
-    const smtcWorker = new Worker(absolutePath);
+    const smtcWorker = new Worker(path.resolve(__dirname, './smtc-worker.js'));
 
-    // TODO Is this necessary?
-    // const contextMenu = Menu.buildFromTemplate([
-    //     { label: 'Show App', click: () => {
-    //         win.show();
-    //         win.setSkipTaskbar(false);
-    //     }},
-    //     { label: 'Quit', click: () => {
-    //         app.isQuitting = true;
-    //         app.quit();
-    //     }}
-    // ]);
-
-    // tray.setContextMenu(contextMenu);
-
-    tray = new Tray('./icon.ico');
+    
+    tray = new Tray(path.resolve(__dirname, './icon.ico'));
     tray.setToolTip('Time Tracker');
     
+    // TODO Is this necessary?
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'Show App', click: () => {
+            win.show();
+            win.setSkipTaskbar(false);
+        }},
+        { label: 'Quit', click: () => {
+            app.isQuitting = true;
+            app.quit();
+        }}
+    ]);
+    tray.setContextMenu(contextMenu);
+
     tray.on('double-click', () => {
         win.show();
         win.setSkipTaskbar(false);
