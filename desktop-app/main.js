@@ -303,7 +303,8 @@ app.whenReady().then(() => {
     win = createWindow();
     ipcMain.on('dev-tools-switch', (_) => devToolsSwitch(win))
     
-    const smtcWorker = new Worker('./smtc-worker.js');
+    const absolutePath = path.resolve(__dirname, './smtc-worker.js'); 
+    const smtcWorker = new Worker(absolutePath);
 
     // TODO Is this necessary?
     // const contextMenu = Menu.buildFromTemplate([
