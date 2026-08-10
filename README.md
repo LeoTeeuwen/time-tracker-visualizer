@@ -15,5 +15,5 @@ You need the ENV keys for each repo. Put those in an ENV file in the root for ea
 
 ## Current bugs being addressed
 
-1. Idle state is not handled properly, so a iser going off idle isn't pushed as an activity marker
+1. Idle state is not handled properly, so a user going off idle isn't pushed as an activity marker
 
