@@ -139,11 +139,11 @@ const grabAllFromDatabase = async (showDayEnds) => {
 
         const timePercentage = (nextEventObject.getTime() - currentEventObject.getTime())/millisecondsInFrame;
 
-        if (entry.application_name === "new_day" || entry.application_name === "end_day" || entry.state === "shutting_down") {
-            // TODO include idle from X time to X time?
+        // TODO handle why there are two different names of shutting down state
+        if (entry.application_name === "new_day" || entry.application_name === "end_day" || entry.state === "shut_down" || entry.state === "shutting_down") {
             labels.push(`No Activity`);
-            // console.log("Idle");
         } else {
+            // TODO handle idling by not handling idle state pushes but rather noting when device goes off idle
             if (entry.state === "idle") {
                 labels.push(`Idle on ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
                 // console.log(`Idle on ${entry.application_name} from ${currentEventObject.toLocaleTimeString()} to ${nextEventObject.toLocaleTimeString()}`);
